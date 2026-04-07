@@ -63,6 +63,10 @@
     <strong>Cómo usar:</strong> Sube dos archivos Excel (.xlsx o .xls). Cada archivo debe tener una columna con el <b>nombre de la empresa</b> y otra con el <b>monto</b> (ventas o compras). El sistema detectará columnas automáticamente y cruzará los datos.
   </div>
 
+  <div id="estadoCarga" class="help" style="display:none;background:#ecfdf5;border-color:#10b981">
+    Cargando datos guardados…
+  </div>
+
   <div class="uploads">
     <div class="upload clientes">
       <h2>Clientes (lo que te compran)</h2>
@@ -174,6 +178,52 @@ document.getElementById('fileProveedores').addEventListener('change', e => {
     actualizar();
   });
 });
+
+// --- PASO 1: cargar datos guardados desde data/*.json ---
+async function cargarGuardado(url) {
+  try {
+    const r = await fetch(url, {cache: 'no-store'});
+    if (!r.ok) return null;
+    const j = await r.json();
+    if (!j || !Array.isArray(j.registros)) return null;
+    return j;
+  } catch (e) { return null; }
+}
+
+async function inicializar() {
+  const estado = document.getElementById('estadoCarga');
+  estado.style.display = 'block';
+  estado.textContent = 'Buscando datos guardados…';
+
+  const [c, p] = await Promise.all([
+    cargarGuardado('data/clientes.json'),
+    cargarGuardado('data/proveedores.json')
+  ]);
+
+  let cargo = false;
+  if (c && c.registros.length) {
+    datosClientes = c.registros.slice().sort((a,b)=>b.monto-a.monto);
+    document.getElementById('infoClientes').textContent =
+      `Datos guardados — ${datosClientes.length} clientes` + (c.actualizado ? ` (act. ${c.actualizado})` : '');
+    cargo = true;
+  }
+  if (p && p.registros.length) {
+    datosProveedores = p.registros.slice().sort((a,b)=>b.monto-a.monto);
+    document.getElementById('infoProveedores').textContent =
+      `Datos guardados — ${datosProveedores.length} proveedores` + (p.actualizado ? ` (act. ${p.actualizado})` : '');
+    cargo = true;
+  }
+
+  if (cargo) {
+    estado.style.background = '#ecfdf5';
+    estado.innerHTML = '<strong>Listo:</strong> mostrando datos guardados en el repositorio. Sube un Excel nuevo para reemplazar la lista (en este Paso 1 todavía no se guarda automáticamente).';
+    actualizar();
+  } else {
+    estado.style.display = 'none';
+  }
+}
+
+inicializar();
 
 function actualizar() {
   const map = new Map();
