@@ -234,15 +234,51 @@ const norm = s => (s||'').toString().trim().toUpperCase().replace(/[.,]/g,'').re
 const STOPWORDS = new Set(['LTD','LTDA','LIMITED','INC','GMBH','SA','SAS','SRL','LLC','CO','CORP','COMPANY','PVT','SPA','BV','AG','KG','AB','AS','OY','SL','DE','CV','SP','ZRT','KFT','FZC','FZCO','FZE','NV','S','R','L','Z','O','THE','AND','OF','VE','TIC','TICARET','LDA','SAN','SRO','RL']);
 // Aliases para corregir typos / variantes conocidas (token -> token canónico)
 const TOKEN_ALIASES = {'TIMECRTI':'TIMECRITI'};
-function normCore(s) {
+function tokenizeCore(s) {
   let x = (s||'').toString().toUpperCase();
   x = x.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   x = x.replace(/\([^)]*\)/g, ' ');
   x = x.replace(/[.,;:'"&\-\/+]/g, ' ');
-  const tokens = x.split(/\s+/)
+  return x.split(/\s+/)
     .filter(t => t && !STOPWORDS.has(t))
     .map(t => TOKEN_ALIASES[t] || t);
-  return tokens.join(' ').trim();
+}
+function normCore(s) {
+  return tokenizeCore(s).join(' ').trim();
+}
+
+function buscarNombreCatalogo(rawName, catIndex, catalogoPreparado) {
+  const key = normCore(rawName);
+  if (!key) return null;
+  if (catIndex.has(key)) return catIndex.get(key);
+
+  const tokens = key.split(' ').filter(Boolean);
+  if (tokens.length < 2) return null;
+  const tokenSet = new Set(tokens);
+  let best = null;
+  let second = null;
+
+  for (const item of catalogoPreparado) {
+    const overlap = item.tokens.filter(t => tokenSet.has(t)).length;
+    if (overlap < 2) continue;
+
+    const shorterCovered = tokens.length <= item.tokens.length
+      ? tokens.every(t => item.tokenSet.has(t))
+      : item.tokens.every(t => tokenSet.has(t));
+    if (!shorterCovered) continue;
+
+    const score = overlap / Math.max(tokens.length, item.tokens.length);
+    if (!best || score > best.score) {
+      second = best;
+      best = {score, nombre: item.nombre};
+    } else if (!second || score > second.score) {
+      second = {score, nombre: item.nombre};
+    }
+  }
+
+  if (!best || best.score < 0.6) return null;
+  if (second && (best.score - second.score) < 0.08) return null;
+  return best.nombre;
 }
 
 function detectarColumnas(rows) {
@@ -284,9 +320,11 @@ function procesarVentas(matriz) {
 
   // Construir índice normalizado del catálogo de clientes
   const catIndex = new Map();
+  const catalogoPreparado = [];
   for (const c of datosClientes) {
     const k = normCore(c.nombre);
     if (k && !catIndex.has(k)) catIndex.set(k, c.nombre);
+    if (k) catalogoPreparado.push({nombre: c.nombre, tokens: tokenizeCore(c.nombre), tokenSet: new Set(tokenizeCore(c.nombre))});
   }
 
   for (let i = 1; i < matriz.length; i++) {
@@ -298,8 +336,7 @@ function procesarVentas(matriz) {
     const cliente = (row[8]||'').toString().trim();
     if (!cliente) { descartadas.sinCliente++; continue; }
 
-    const claveCliente = normCore(cliente);
-    const nombreCatalogo = catIndex.get(claveCliente);
+    const nombreCatalogo = buscarNombreCatalogo(cliente, catIndex, catalogoPreparado);
     if (!nombreCatalogo) { descartadas.sinCatalogo++; continue; }
 
     const ingreso = parseFloat(String(row[9]||'0').replace(/[^0-9.\-]/g,'')) || 0;
@@ -360,9 +397,11 @@ function procesarCompras(matriz) {
 
   // Índice del catálogo de proveedores
   const catIndex = new Map();
+  const catalogoPreparado = [];
   for (const p of datosProveedores) {
     const k = normCore(p.nombre);
     if (k && !catIndex.has(k)) catIndex.set(k, p.nombre);
+    if (k) catalogoPreparado.push({nombre: p.nombre, tokens: tokenizeCore(p.nombre), tokenSet: new Set(tokenizeCore(p.nombre))});
   }
 
   for (let i = 1; i < matriz.length; i++) {
@@ -379,8 +418,7 @@ function procesarCompras(matriz) {
     const proveedor = (row[0]||'').toString().trim();
     if (!proveedor) { descartadas.sinProveedor++; continue; }
 
-    const claveProv = normCore(proveedor);
-    const nombreCatalogo = catIndex.get(claveProv);
+    const nombreCatalogo = buscarNombreCatalogo(proveedor, catIndex, catalogoPreparado);
     if (!nombreCatalogo) { descartadas.sinCatalogo++; continue; }
 
     const total = parseFloat(String(row[12]||'0').replace(/[^0-9.\-]/g,'')) || 0;
@@ -1049,6 +1087,8 @@ function escapeHtml(s) {
 
 const TOP_N = 25;
 let sortKey = 'venta_usd', sortDir = -1;
+let sortTopClientesKey = 'venta_usd', sortTopClientesDir = -1;
+let sortTopProveedoresKey = 'compras_default', sortTopProveedoresDir = -1;
 
 function _filtrar() {
   const q = document.getElementById('search').value.toUpperCase();
@@ -1124,21 +1164,52 @@ function _renderTabla(data, contenedor) {
   }));
 }
 
-// Suma aproximada de compras en todas las monedas (sin convertir) para ranking
-function _totalCompras(r) {
-  return Object.values(r.compras||{}).reduce((s,v)=>s+(v||0),0);
+function _monedaPrincipalTopProveedores() {
+  if (monedasCompra.includes('USD')) return 'USD';
+  return monedasCompra[0] || 'USD';
+}
+
+function _valorTopProveedor(r, key) {
+  if (key === 'nombre') return r.nombre || '';
+  if (key === 'embarques_compra') return r.embarques_compra || 0;
+  if (key === 'compras_default') return ((r.compras || {})[_monedaPrincipalTopProveedores()] || 0);
+  if (key.startsWith('compras_')) {
+    const moneda = key.replace('compras_', '');
+    return ((r.compras || {})[moneda] || 0);
+  }
+  return 0;
+}
+
+function _ordenarTopClientes(data) {
+  return data.slice().sort((a, b) => {
+    const va = sortTopClientesKey === 'nombre' ? (a.nombre || '') : (a[sortTopClientesKey] || 0);
+    const vb = sortTopClientesKey === 'nombre' ? (b.nombre || '') : (b[sortTopClientesKey] || 0);
+    if (typeof va === 'string' || typeof vb === 'string') return va.localeCompare(vb) * sortTopClientesDir;
+    if (va === vb) return (a.nombre || '').localeCompare(b.nombre || '');
+    return ((va > vb ? 1 : -1) * sortTopClientesDir);
+  });
+}
+
+function _ordenarTopProveedores(data) {
+  return data.slice().sort((a, b) => {
+    const va = _valorTopProveedor(a, sortTopProveedoresKey);
+    const vb = _valorTopProveedor(b, sortTopProveedoresKey);
+    if (typeof va === 'string' || typeof vb === 'string') return va.localeCompare(vb) * sortTopProveedoresDir;
+    if (va === vb) return (a.nombre || '').localeCompare(b.nombre || '');
+    return ((va > vb ? 1 : -1) * sortTopProveedoresDir);
+  });
 }
 
 // Tabla reducida Top Clientes (solo registros con venta)
 function _renderTopClientes(data, contenedor) {
-  const clientes = data.filter(r => r.tieneVenta).slice(0, TOP_N);
+  const clientes = _ordenarTopClientes(data.filter(r => r.tieneVenta)).slice(0, TOP_N);
   if (!clientes.length) { contenedor.innerHTML = '<div class="empty">Sin ventas en el año</div>'; return; }
   let html = `<table><thead><tr>
-    <th>Empresa</th>
-    <th class="num">Venta USD</th>
-    <th class="num">Utilidad USD</th>
-    <th class="num">% Margen</th>
-    <th class="num">Emb.</th>
+    <th data-top-clientes="nombre">Empresa</th>
+    <th class="num" data-top-clientes="venta_usd">Venta USD</th>
+    <th class="num" data-top-clientes="utilidad_usd">Utilidad USD</th>
+    <th class="num" data-top-clientes="margen_pct">% Margen</th>
+    <th class="num" data-top-clientes="embarques_venta">Emb.</th>
   </tr></thead><tbody>`;
   for (const r of clientes) {
     const negClass = (r.utilidad_usd||0) < 0 ? 'utilidad-neg' : '';
@@ -1153,20 +1224,26 @@ function _renderTopClientes(data, contenedor) {
   }
   html += '</tbody></table>';
   contenedor.innerHTML = html;
+  contenedor.querySelectorAll('th[data-top-clientes]').forEach(th => th.addEventListener('click', () => {
+    const k = th.dataset.topClientes;
+    if (sortTopClientesKey === k) sortTopClientesDir *= -1;
+    else {
+      sortTopClientesKey = k;
+      sortTopClientesDir = k === 'nombre' ? 1 : -1;
+    }
+    pintarTabla();
+  }));
 }
 
 // Tabla reducida Top Proveedores (solo registros con compras)
 function _renderTopProveedores(data, contenedor) {
-  const proveedores = data.filter(r => r.tieneCompra)
-    .slice() // copy
-    .sort((a,b) => _totalCompras(b) - _totalCompras(a))
-    .slice(0, TOP_N);
+  const proveedores = _ordenarTopProveedores(data.filter(r => r.tieneCompra)).slice(0, TOP_N);
   if (!proveedores.length) { contenedor.innerHTML = '<div class="empty">Sin compras en el año</div>'; return; }
-  const monedasHdr = monedasCompra.map(m => `<th class="num">Compras ${m}</th>`).join('');
+  const monedasHdr = monedasCompra.map(m => `<th class="num" data-top-proveedores="compras_${m}">Compras ${m}</th>`).join('');
   let html = `<table><thead><tr>
-    <th>Empresa</th>
+    <th data-top-proveedores="nombre">Empresa</th>
     ${monedasHdr}
-    <th class="num">Emb.</th>
+    <th class="num" data-top-proveedores="embarques_compra">Emb.</th>
   </tr></thead><tbody>`;
   for (const r of proveedores) {
     html += '<tr>';
@@ -1180,6 +1257,15 @@ function _renderTopProveedores(data, contenedor) {
   }
   html += '</tbody></table>';
   contenedor.innerHTML = html;
+  contenedor.querySelectorAll('th[data-top-proveedores]').forEach(th => th.addEventListener('click', () => {
+    const k = th.dataset.topProveedores;
+    if (sortTopProveedoresKey === k) sortTopProveedoresDir *= -1;
+    else {
+      sortTopProveedoresKey = k;
+      sortTopProveedoresDir = k === 'nombre' ? 1 : -1;
+    }
+    pintarTabla();
+  }));
 }
 
 function pintarTabla() {
@@ -1196,8 +1282,9 @@ function pintarTabla() {
   if (modoOps) {
     const nClientes = dataFiltrada.filter(r => r.tieneVenta).length;
     const nProv = dataFiltrada.filter(r => r.tieneCompra).length;
+    const monedaTopProv = _monedaPrincipalTopProveedores();
     tituloCli.innerHTML = `Top ${TOP_N} Clientes <span style="font-size:12px;color:#6b7280;font-weight:400">(por venta USD${nClientes>TOP_N?` — de ${nClientes}`:''})</span>`;
-    tituloProv.innerHTML = `Top ${TOP_N} Proveedores <span style="font-size:12px;color:#6b7280;font-weight:400">(por total pagado${nProv>TOP_N?` — de ${nProv}`:''})</span>`;
+    tituloProv.innerHTML = `Top ${TOP_N} Proveedores <span style="font-size:12px;color:#6b7280;font-weight:400">(por compras ${monedaTopProv}${nProv>TOP_N?` — de ${nProv}`:''})</span>`;
     _renderTopClientes(dataOrdenada, wrapClientes);
     _renderTopProveedores(dataOrdenada, wrapProveedores);
     // Tabla completa abajo con todas las columnas y ordenamiento dinámico
