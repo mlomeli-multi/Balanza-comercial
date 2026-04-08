@@ -80,6 +80,26 @@
     </div>
   </div>
 
+  <div class="panel" style="background:#fffbeb;border:1px solid #fde68a">
+    <h2 style="display:flex;align-items:center;gap:8px">Datos de operación (año en curso)
+      <span style="font-size:11px;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-weight:600">LOCAL · solo tú lo ves</span>
+    </h2>
+    <p style="font-size:13px;color:#6b7280;margin:0 0 12px">Sube los Excel de <b>Venta</b> y <b>Compra</b>. Los datos se guardan solo en este navegador y se filtran al año en curso según la nomenclatura del embarque. Cada carga nueva reemplaza la anterior.</p>
+    <div class="uploads" style="margin-bottom:0">
+      <div class="upload" style="border-color:#3b82f6">
+        <h2>Excel de Ventas</h2>
+        <input type="file" id="fileVentas" accept=".xlsx,.xls,.csv">
+        <div class="info" id="infoVentas">Sin archivo</div>
+      </div>
+      <div class="upload" style="border-color:#a855f7">
+        <h2>Excel de Compras</h2>
+        <input type="file" id="fileCompras" accept=".xlsx,.xls,.csv">
+        <div class="info" id="infoCompras">Sin archivo</div>
+      </div>
+    </div>
+    <div style="margin-top:12px"><button id="btnLimpiarOps" style="background:#dc2626">Limpiar datos de operación</button></div>
+  </div>
+
   <div class="grid cards">
     <div class="card"><h3>Total Ventas</h3><div class="val" id="kpiVentas">-</div><div class="sub" id="kpiVentasSub">clientes</div></div>
     <div class="card"><h3>Total Compras</h3><div class="val" id="kpiCompras">-</div><div class="sub" id="kpiComprasSub">proveedores</div></div>
@@ -119,6 +139,79 @@ let datosClientes = [];
 let datosProveedores = [];
 let combinado = [];
 let chartC = null, chartP = null;
+
+// Datos de operación (ventas / compras procesadas desde Excel)
+let opsVentas = null;   // {actualizado, archivo, total_usd, utilidad_usd, registros:{...}, descartados:{...}}
+let opsCompras = null;  // {actualizado, archivo, monedas:[], registros:{...}, descartados:{...}}
+const LS_KEY = 'balanza_ops_v1';
+const ANIO_ACTUAL = new Date().getFullYear();
+
+// === Clasificación de embarques por prefijo ===
+// Fuente: tabla proporcionada por el usuario (AIR/SEA/OTR/PROYECTO)
+const CLASIFICACION_EMBARQUE = {
+  // AIR
+  IA:  {cat:'AIR', sub:'Importación Aérea'},
+  EA:  {cat:'AIR', sub:'Exportación Aérea'},
+  IH:  {cat:'AIR', sub:'Importación Handcarry'},
+  EH:  {cat:'AIR', sub:'Exportación Handcarry'},
+  DH:  {cat:'AIR', sub:'Doméstico Handcarry'},
+  DA:  {cat:'AIR', sub:'Doméstico Aéreo'},
+  IC:  {cat:'AIR', sub:'Importación Charter'},
+  EC:  {cat:'AIR', sub:'Exportación Charter'},
+  DC:  {cat:'AIR', sub:'Doméstico Charter'},
+  AA:  {cat:'AIR', sub:'Arrastre Aéreo'},
+  // SEA
+  EM:  {cat:'SEA', sub:'Exportación Marítima'},
+  IM:  {cat:'SEA', sub:'Importación Marítima'},
+  DM:  {cat:'SEA', sub:'Doméstico Marítimo'},
+  AM:  {cat:'SEA', sub:'Arrastre Marítimo'},
+  // OTR
+  DT:  {cat:'OTR', sub:'Doméstico Terrestre'},
+  ET:  {cat:'OTR', sub:'Exportación Terrestre'},
+  IT:  {cat:'OTR', sub:'Importación Terrestre'},
+  WH:  {cat:'OTR', sub:'Wharehouse'},
+  // PROYECTO
+  DP:  {cat:'PROYECTO', sub:'Doméstico Proyecto'},
+  EP:  {cat:'PROYECTO', sub:'Exportación Doméstica'},
+  IP:  {cat:'PROYECTO', sub:'Importación Doméstico'},
+  DPA: {cat:'PROYECTO', sub:'Doméstico Proyecto Aéreo'},
+  EPA: {cat:'PROYECTO', sub:'Exportación Proyecto Aéreo'},
+  IPA: {cat:'PROYECTO', sub:'Importación Proyecto Aéreo'},
+  APM: {cat:'PROYECTO', sub:'Arrastre Proyecto Marítimo'},
+  EPM: {cat:'PROYECTO', sub:'Exportación Proyecto Marítimo'},
+  IPM: {cat:'PROYECTO', sub:'Importación Proyecto Marítimo'},
+  DPT: {cat:'PROYECTO', sub:'Doméstico Proyecto Terrestre'},
+  EPT: {cat:'PROYECTO', sub:'Exportación Proyecto Terrestre'},
+  IPT: {cat:'PROYECTO', sub:'Importación Proyecto Terrestre'},
+};
+
+// Parser del embarque: extrae prefijo, año y mes
+// Ej. "DT-202604-1389" → {prefijo:"DT", anio:2026, mes:4, cat:"OTR", sub:"Doméstico Terrestre"}
+function parseEmbarque(s) {
+  if (!s) return null;
+  const m = String(s).trim().toUpperCase().match(/^([A-Z]+)-(\d{4})(\d{2})-/);
+  if (!m) return null;
+  const pre = m[1], anio = parseInt(m[2],10), mes = parseInt(m[3],10);
+  const clas = CLASIFICACION_EMBARQUE[pre] || {cat:'DESCONOCIDO', sub:pre};
+  return {prefijo:pre, anio, mes, cat:clas.cat, sub:clas.sub};
+}
+
+// Normaliza nombre de moneda
+function normMoneda(s) {
+  const x = (s||'').toString().trim().toUpperCase();
+  if (/PESO|MXN|MEXIC/.test(x)) return 'MXN';
+  if (/U\.?S\.?\s*DOL|USD|DOLAR/.test(x)) return 'USD';
+  if (/EUR/.test(x)) return 'EUR';
+  if (/GBP|LIBRA/.test(x)) return 'GBP';
+  return x || 'SIN_MONEDA';
+}
+
+// Filtros de estatus para compras
+const ESTATUS_EMB_OK = new Set(['EN TRANSITO','EMBARQUE ENVIADO','EN CAPTURA DE CARTAS DE INSTRUCCION','EMBARQUE FINALIZADO','ENTREGADO']);
+const ESTATUS_PROV_OK = new Set(['DRAFT','LIBERADO A ADMINISTRACION','LIBERADA AL PROVEEDOR','PROCESADO/FACTURADO']);
+function normEstatus(s) {
+  return (s||'').toString().trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
 
 const fmt = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n||0);
 const norm = s => (s||'').toString().trim().toUpperCase().replace(/[.,]/g,'').replace(/\s+/g,' ');
@@ -161,6 +254,261 @@ function procesar(rows) {
   }
   return [...map.entries()].map(([nombre, monto]) => ({nombre, monto})).sort((a,b)=>b.monto-a.monto);
 }
+
+// ==== PROCESAMIENTO DE EXCEL DE VENTAS ====
+// Columnas (0-based): C=2 Embarque, I=8 Cliente, J=9 Ingreso, L=11 Neto Final
+function procesarVentas(matriz) {
+  // matriz es un arreglo de arreglos (row → [col A, col B, ...])
+  // Fila 0 es encabezado, los datos empiezan en la fila 1
+  const porCliente = new Map();
+  let procesadas = 0;
+  const descartadas = {sinEmbarque:0, anioDistinto:0, sinCatalogo:0, sinCliente:0};
+
+  // Construir índice normalizado del catálogo de clientes
+  const catIndex = new Map();
+  for (const c of datosClientes) {
+    const k = normCore(c.nombre);
+    if (k && !catIndex.has(k)) catIndex.set(k, c.nombre);
+  }
+
+  for (let i = 1; i < matriz.length; i++) {
+    const row = matriz[i] || [];
+    const embarque = parseEmbarque(row[2]);
+    if (!embarque) { descartadas.sinEmbarque++; continue; }
+    if (embarque.anio !== ANIO_ACTUAL) { descartadas.anioDistinto++; continue; }
+
+    const cliente = (row[8]||'').toString().trim();
+    if (!cliente) { descartadas.sinCliente++; continue; }
+
+    const claveCliente = normCore(cliente);
+    const nombreCatalogo = catIndex.get(claveCliente);
+    if (!nombreCatalogo) { descartadas.sinCatalogo++; continue; }
+
+    const ingreso = parseFloat(String(row[9]||'0').replace(/[^0-9.\-]/g,'')) || 0;
+    const neto = parseFloat(String(row[11]||'0').replace(/[^0-9.\-]/g,'')) || 0;
+
+    const key = normCore(nombreCatalogo);
+    if (!porCliente.has(key)) {
+      porCliente.set(key, {
+        nombre: nombreCatalogo,
+        ingreso_usd: 0,
+        utilidad_usd: 0,
+        embarques: 0,
+        porCategoria: {},
+        porSubcategoria: {}
+      });
+    }
+    const e = porCliente.get(key);
+    e.ingreso_usd += ingreso;
+    e.utilidad_usd += neto;
+    e.embarques += 1;
+
+    const catKey = embarque.cat;
+    if (!e.porCategoria[catKey]) e.porCategoria[catKey] = {ingreso:0, utilidad:0, count:0};
+    e.porCategoria[catKey].ingreso += ingreso;
+    e.porCategoria[catKey].utilidad += neto;
+    e.porCategoria[catKey].count += 1;
+
+    const subKey = embarque.prefijo;
+    if (!e.porSubcategoria[subKey]) e.porSubcategoria[subKey] = {ingreso:0, utilidad:0, count:0, sub:embarque.sub, cat:embarque.cat};
+    e.porSubcategoria[subKey].ingreso += ingreso;
+    e.porSubcategoria[subKey].utilidad += neto;
+    e.porSubcategoria[subKey].count += 1;
+
+    procesadas++;
+  }
+
+  const totalIngreso = [...porCliente.values()].reduce((s,x)=>s+x.ingreso_usd,0);
+  const totalUtilidad = [...porCliente.values()].reduce((s,x)=>s+x.utilidad_usd,0);
+
+  return {
+    actualizado: new Date().toISOString(),
+    total_usd: totalIngreso,
+    utilidad_usd: totalUtilidad,
+    procesadas,
+    descartadas,
+    registros: Object.fromEntries(porCliente)
+  };
+}
+
+// ==== PROCESAMIENTO DE EXCEL DE COMPRAS ====
+// Columnas: A=0 Proveedor, C=2 Embarque, E=4 Estatus Emb., F=5 Concepto,
+//           I=8 Estatus Provision, M=12 Total, N=13 Moneda
+function procesarCompras(matriz) {
+  const porProveedor = new Map();
+  let procesadas = 0;
+  const descartadas = {sinEmbarque:0, anioDistinto:0, estatusEmb:0, estatusProv:0, sinCatalogo:0, sinProveedor:0};
+  const monedasSet = new Set();
+
+  // Índice del catálogo de proveedores
+  const catIndex = new Map();
+  for (const p of datosProveedores) {
+    const k = normCore(p.nombre);
+    if (k && !catIndex.has(k)) catIndex.set(k, p.nombre);
+  }
+
+  for (let i = 1; i < matriz.length; i++) {
+    const row = matriz[i] || [];
+    const embarque = parseEmbarque(row[2]);
+    if (!embarque) { descartadas.sinEmbarque++; continue; }
+    if (embarque.anio !== ANIO_ACTUAL) { descartadas.anioDistinto++; continue; }
+
+    const eEmb = normEstatus(row[4]);
+    if (!ESTATUS_EMB_OK.has(eEmb)) { descartadas.estatusEmb++; continue; }
+    const eProv = normEstatus(row[8]);
+    if (!ESTATUS_PROV_OK.has(eProv)) { descartadas.estatusProv++; continue; }
+
+    const proveedor = (row[0]||'').toString().trim();
+    if (!proveedor) { descartadas.sinProveedor++; continue; }
+
+    const claveProv = normCore(proveedor);
+    const nombreCatalogo = catIndex.get(claveProv);
+    if (!nombreCatalogo) { descartadas.sinCatalogo++; continue; }
+
+    const total = parseFloat(String(row[12]||'0').replace(/[^0-9.\-]/g,'')) || 0;
+    const moneda = normMoneda(row[13]);
+    monedasSet.add(moneda);
+
+    const key = normCore(nombreCatalogo);
+    if (!porProveedor.has(key)) {
+      porProveedor.set(key, {
+        nombre: nombreCatalogo,
+        compras: {},     // por moneda
+        embarques: 0,
+        porCategoria: {}, // cat → {moneda: monto, count}
+        porSubcategoria: {}
+      });
+    }
+    const e = porProveedor.get(key);
+    e.compras[moneda] = (e.compras[moneda]||0) + total;
+    e.embarques += 1;
+
+    const catKey = embarque.cat;
+    if (!e.porCategoria[catKey]) e.porCategoria[catKey] = {montos:{}, count:0};
+    e.porCategoria[catKey].montos[moneda] = (e.porCategoria[catKey].montos[moneda]||0) + total;
+    e.porCategoria[catKey].count += 1;
+
+    const subKey = embarque.prefijo;
+    if (!e.porSubcategoria[subKey]) e.porSubcategoria[subKey] = {montos:{}, count:0, sub:embarque.sub, cat:embarque.cat};
+    e.porSubcategoria[subKey].montos[moneda] = (e.porSubcategoria[subKey].montos[moneda]||0) + total;
+    e.porSubcategoria[subKey].count += 1;
+
+    procesadas++;
+  }
+
+  // Totales por moneda
+  const totalesPorMoneda = {};
+  for (const r of porProveedor.values()) {
+    for (const [mon, v] of Object.entries(r.compras)) {
+      totalesPorMoneda[mon] = (totalesPorMoneda[mon]||0) + v;
+    }
+  }
+
+  return {
+    actualizado: new Date().toISOString(),
+    monedas: [...monedasSet].sort(),
+    totalesPorMoneda,
+    procesadas,
+    descartadas,
+    registros: Object.fromEntries(porProveedor)
+  };
+}
+
+// ==== GUARDADO / CARGA EN LOCALSTORAGE ====
+function guardarOps() {
+  try {
+    const payload = {ventas: opsVentas, compras: opsCompras};
+    localStorage.setItem(LS_KEY, JSON.stringify(payload));
+  } catch (e) {
+    alert('No se pudo guardar en el navegador: ' + e.message);
+  }
+}
+function cargarOpsLocal() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const p = JSON.parse(raw);
+    if (p.ventas) opsVentas = p.ventas;
+    if (p.compras) opsCompras = p.compras;
+  } catch (e) { console.warn('Error cargando ops locales', e); }
+}
+function limpiarOps() {
+  opsVentas = null;
+  opsCompras = null;
+  localStorage.removeItem(LS_KEY);
+}
+
+// ==== LECTOR DE EXCEL COMO MATRIZ (sin encabezados por nombre) ====
+function leerExcelComoMatriz(file, cb) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const wb = XLSX.read(e.target.result, {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const matriz = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+    cb(matriz);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ==== RENDER DE INFO DE OPERACIÓN (resumen en los uploads) ====
+function fmtNum(n) { return new Intl.NumberFormat('es-MX',{maximumFractionDigits:0}).format(n||0); }
+function fmtUSD(n) { return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n||0); }
+
+function renderInfoVentas() {
+  const info = document.getElementById('infoVentas');
+  if (!opsVentas) { info.textContent = 'Sin archivo'; return; }
+  const nClientes = Object.keys(opsVentas.registros||{}).length;
+  const d = opsVentas.descartadas || {};
+  const descTotal = (d.sinEmbarque||0)+(d.anioDistinto||0)+(d.sinCatalogo||0)+(d.sinCliente||0);
+  const fecha = new Date(opsVentas.actualizado).toLocaleString('es-MX');
+  info.innerHTML = `<b>${nClientes}</b> clientes · <b>${fmtNum(opsVentas.procesadas)}</b> embarques · <b>${fmtUSD(opsVentas.total_usd)}</b> venta · <b>${fmtUSD(opsVentas.utilidad_usd)}</b> utilidad<br><span style="color:#6b7280">Descartadas: ${descTotal} (sin catálogo: ${d.sinCatalogo||0}, otro año: ${d.anioDistinto||0}, sin embarque: ${d.sinEmbarque||0}) · ${fecha}</span>`;
+}
+
+function renderInfoCompras() {
+  const info = document.getElementById('infoCompras');
+  if (!opsCompras) { info.textContent = 'Sin archivo'; return; }
+  const nProv = Object.keys(opsCompras.registros||{}).length;
+  const d = opsCompras.descartadas || {};
+  const descTotal = Object.values(d).reduce((s,x)=>s+(x||0),0);
+  const fecha = new Date(opsCompras.actualizado).toLocaleString('es-MX');
+  const totalesStr = Object.entries(opsCompras.totalesPorMoneda||{})
+    .map(([m,v]) => `<b>${fmtNum(v)}</b> ${m}`).join(' · ') || '—';
+  info.innerHTML = `<b>${nProv}</b> proveedores · <b>${fmtNum(opsCompras.procesadas)}</b> embarques · ${totalesStr}<br><span style="color:#6b7280">Descartadas: ${descTotal} (sin catálogo: ${d.sinCatalogo||0}, estatus emb: ${d.estatusEmb||0}, estatus prov: ${d.estatusProv||0}, otro año: ${d.anioDistinto||0}) · ${fecha}</span>`;
+}
+
+// ==== EVENT LISTENERS DE LOS UPLOADS DE OPERACIÓN ====
+document.getElementById('fileVentas').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  leerExcelComoMatriz(f, matriz => {
+    opsVentas = procesarVentas(matriz);
+    opsVentas.archivo = f.name;
+    guardarOps();
+    renderInfoVentas();
+    if (typeof actualizar === 'function') actualizar();
+  });
+});
+document.getElementById('fileCompras').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  leerExcelComoMatriz(f, matriz => {
+    opsCompras = procesarCompras(matriz);
+    opsCompras.archivo = f.name;
+    guardarOps();
+    renderInfoCompras();
+    if (typeof actualizar === 'function') actualizar();
+  });
+});
+document.getElementById('btnLimpiarOps').addEventListener('click', () => {
+  if (!confirm('¿Borrar los datos de ventas y compras guardados en este navegador?')) return;
+  limpiarOps();
+  renderInfoVentas();
+  renderInfoCompras();
+  if (typeof actualizar === 'function') actualizar();
+});
+
+// Cargar datos locales al abrir
+cargarOpsLocal();
+renderInfoVentas();
+renderInfoCompras();
 
 function leerArchivo(file, cb) {
   const reader = new FileReader();
