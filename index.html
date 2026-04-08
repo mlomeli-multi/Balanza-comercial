@@ -96,7 +96,6 @@
         <div class="info" id="infoCompras">Sin archivo</div>
       </div>
     </div>
-    <div style="margin-top:12px"><button id="btnLimpiarOps" style="background:#dc2626">Limpiar datos de operación</button></div>
   </div>
 
   <div class="grid cards" id="kpisWrap">
@@ -125,6 +124,10 @@
         <option value="con_compra">Con compra</option>
       </select>
       <button id="exportBtn">Exportar Excel</button>
+      <button id="btnDescargarBackup">Descargar backup JSON</button>
+      <button id="btnCargarBackup">Cargar backup JSON</button>
+      <button id="btnLimpiarOps" style="background:#dc2626">Limpiar datos locales</button>
+      <input type="file" id="fileBackupJson" accept=".json,application/json" style="display:none">
     </div>
   </div>
 
@@ -453,6 +456,51 @@ function limpiarOps() {
   localStorage.removeItem(LS_KEY);
 }
 
+function aplicarOpsDesdePayload(payload) {
+  opsVentas = payload && payload.ventas ? payload.ventas : null;
+  opsCompras = payload && payload.compras ? payload.compras : null;
+  if (!opsVentas && !opsCompras) limpiarOps();
+  else guardarOps();
+  renderInfoVentas();
+  renderInfoCompras();
+  if (typeof actualizar === 'function') actualizar();
+}
+
+function descargarBackupOps() {
+  const payload = {
+    version: 1,
+    exportado: new Date().toISOString(),
+    ventas: opsVentas,
+    compras: opsCompras
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `balanza_ops_backup_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function cargarBackupOps(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const payload = JSON.parse(e.target.result);
+      const tieneVentas = payload && typeof payload === 'object' && ('ventas' in payload);
+      const tieneCompras = payload && typeof payload === 'object' && ('compras' in payload);
+      if (!tieneVentas && !tieneCompras) throw new Error('El archivo no contiene ventas ni compras.');
+      aplicarOpsDesdePayload(payload);
+      alert('Backup cargado correctamente.');
+    } catch (err) {
+      alert('No se pudo cargar el backup: ' + err.message);
+    }
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
 // ==== LECTOR DE EXCEL COMO MATRIZ (sin encabezados por nombre) ====
 function leerExcelComoMatriz(file, cb) {
   const reader = new FileReader();
@@ -514,10 +562,20 @@ document.getElementById('fileCompras').addEventListener('change', e => {
 });
 document.getElementById('btnLimpiarOps').addEventListener('click', () => {
   if (!confirm('¿Borrar los datos de ventas y compras guardados en este navegador?')) return;
-  limpiarOps();
-  renderInfoVentas();
-  renderInfoCompras();
-  if (typeof actualizar === 'function') actualizar();
+  aplicarOpsDesdePayload({ventas:null, compras:null});
+});
+document.getElementById('btnDescargarBackup').addEventListener('click', () => {
+  if (!opsVentas && !opsCompras) return alert('No hay datos locales para respaldar.');
+  descargarBackupOps();
+});
+document.getElementById('btnCargarBackup').addEventListener('click', () => {
+  document.getElementById('fileBackupJson').click();
+});
+document.getElementById('fileBackupJson').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  cargarBackupOps(f);
+  e.target.value = '';
 });
 
 // Cargar datos locales al abrir
