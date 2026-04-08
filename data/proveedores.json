@@ -1,5 +1,5 @@
 {
-  "actualizado": "2026-04-07",
+  "actualizado": "2026-04-08",
   "tipo": "catalogo",
   "registros": [
     {
@@ -253,6 +253,21 @@
     },
     {
       "nombre": "TIMECRITI WORLDWIDE LOGISTICS"
+    },
+    {
+      "nombre": "GUANGZHOU AIRBORNE GLOBAL LOGISTICS CO LTD"
+    },
+    {
+      "nombre": "TIME:MATTERS AMERICAS, INC."
+    },
+    {
+      "nombre": "NINGBO CTS INTERNATIONAL LOGISTICS CO.,LTD (WCA) (NINGBO)"
+    },
+    {
+      "nombre": "TIMECRTI WORLDWIDE LOGISTICS"
+    },
+    {
+      "nombre": "YQN TRIMAN LOGISTICS CO LTD"
     }
   ]
 }
