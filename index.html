@@ -54,6 +54,7 @@
   button:hover { background: #1d4ed8; }
   .empty { text-align: center; padding: 40px; color: #9ca3af; }
   .help { background: #eff6ff; border-left: 4px solid #2563eb; padding: 12px 16px; border-radius: 4px; font-size: 13px; margin-bottom: 16px; }
+  @media (max-width: 1100px) { #topsGrid { grid-template-columns: 1fr !important; } }
   @media (max-width: 800px) { .uploads, .charts { grid-template-columns: 1fr; } main { padding: 16px; } }
 </style>
 </head>
@@ -113,7 +114,6 @@
   </div>
 
   <div class="panel">
-    <h2 id="tituloTabla">Tabla principal</h2>
     <div class="toolbar">
       <input type="text" id="search" placeholder="Buscar empresa...">
       <select id="filtro">
@@ -126,11 +126,21 @@
       </select>
       <button id="exportBtn">Exportar Excel</button>
     </div>
-    <div id="tablaWrap"><div class="empty">Sin datos</div></div>
+  </div>
+
+  <div class="grid" id="topsGrid" style="grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+    <div class="panel" style="margin:0">
+      <h2 id="tituloTopClientes">Top 25 Clientes <span style="font-size:12px;color:#6b7280;font-weight:400">(por venta USD)</span></h2>
+      <div id="tablaClientesWrap"><div class="empty">Sin datos</div></div>
+    </div>
+    <div class="panel" style="margin:0">
+      <h2 id="tituloTopProveedores">Top 25 Proveedores <span style="font-size:12px;color:#6b7280;font-weight:400">(por total pagado)</span></h2>
+      <div id="tablaProveedoresWrap"><div class="empty">Sin datos</div></div>
+    </div>
   </div>
 
   <div class="panel" id="panelTodos" style="display:none">
-    <h2>Tabla completa (todos los registros)</h2>
+    <h2 id="tituloTodos">Tabla completa (todos los registros)</h2>
     <div id="tablaTodosWrap"></div>
   </div>
 </main>
@@ -836,21 +846,91 @@ function _renderTabla(data, contenedor) {
   }));
 }
 
+// Suma aproximada de compras en todas las monedas (sin convertir) para ranking
+function _totalCompras(r) {
+  return Object.values(r.compras||{}).reduce((s,v)=>s+(v||0),0);
+}
+
+// Tabla reducida Top Clientes (solo registros con venta)
+function _renderTopClientes(data, contenedor) {
+  const clientes = data.filter(r => r.tieneVenta).slice(0, TOP_N);
+  if (!clientes.length) { contenedor.innerHTML = '<div class="empty">Sin ventas en el año</div>'; return; }
+  let html = `<table><thead><tr>
+    <th>Empresa</th>
+    <th class="num">Venta USD</th>
+    <th class="num">Utilidad USD</th>
+    <th class="num">% Margen</th>
+    <th class="num">Emb.</th>
+  </tr></thead><tbody>`;
+  for (const r of clientes) {
+    const negClass = (r.utilidad_usd||0) < 0 ? 'utilidad-neg' : '';
+    const margen = r.margen_pct === null ? '—' : r.margen_pct.toFixed(1)+'%';
+    html += `<tr class="${negClass}">`;
+    html += `<td>${escapeHtml(r.nombre)}</td>`;
+    html += `<td class="num">${fmtMoneda(r.venta_usd,'USD')}</td>`;
+    html += `<td class="num ${(r.utilidad_usd||0)<0?'neg':'pos'}">${fmtMoneda(r.utilidad_usd,'USD')}</td>`;
+    html += `<td class="num">${margen}</td>`;
+    html += `<td class="num">${r.embarques_venta||0}</td>`;
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  contenedor.innerHTML = html;
+}
+
+// Tabla reducida Top Proveedores (solo registros con compras)
+function _renderTopProveedores(data, contenedor) {
+  const proveedores = data.filter(r => r.tieneCompra)
+    .slice() // copy
+    .sort((a,b) => _totalCompras(b) - _totalCompras(a))
+    .slice(0, TOP_N);
+  if (!proveedores.length) { contenedor.innerHTML = '<div class="empty">Sin compras en el año</div>'; return; }
+  const monedasHdr = monedasCompra.map(m => `<th class="num">Compras ${m}</th>`).join('');
+  let html = `<table><thead><tr>
+    <th>Empresa</th>
+    ${monedasHdr}
+    <th class="num">Emb.</th>
+  </tr></thead><tbody>`;
+  for (const r of proveedores) {
+    html += '<tr>';
+    html += `<td>${escapeHtml(r.nombre)}</td>`;
+    for (const m of monedasCompra) {
+      const v = (r.compras||{})[m] || 0;
+      html += `<td class="num">${v?fmtMoneda(v,m):'—'}</td>`;
+    }
+    html += `<td class="num">${r.embarques_compra||0}</td>`;
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  contenedor.innerHTML = html;
+}
+
 function pintarTabla() {
-  const data = _ordenar(_filtrar(), sortKey, sortDir);
-  const wrapTop = document.getElementById('tablaWrap');
+  const dataFiltrada = _filtrar();
+  const dataOrdenada = _ordenar(dataFiltrada, 'venta_usd', -1);
+  const wrapClientes = document.getElementById('tablaClientesWrap');
+  const wrapProveedores = document.getElementById('tablaProveedoresWrap');
   const panelTodos = document.getElementById('panelTodos');
   const wrapTodos = document.getElementById('tablaTodosWrap');
-  const titulo = document.getElementById('tituloTabla');
+  const tituloCli = document.getElementById('tituloTopClientes');
+  const tituloProv = document.getElementById('tituloTopProveedores');
+  const tituloTodos = document.getElementById('tituloTodos');
 
-  if (modoOps && data.length > TOP_N) {
-    titulo.textContent = `Top ${TOP_N} (de ${data.length})`;
-    _renderTabla(data.slice(0, TOP_N), wrapTop);
+  if (modoOps) {
+    const nClientes = dataFiltrada.filter(r => r.tieneVenta).length;
+    const nProv = dataFiltrada.filter(r => r.tieneCompra).length;
+    tituloCli.innerHTML = `Top ${TOP_N} Clientes <span style="font-size:12px;color:#6b7280;font-weight:400">(por venta USD${nClientes>TOP_N?` — de ${nClientes}`:''})</span>`;
+    tituloProv.innerHTML = `Top ${TOP_N} Proveedores <span style="font-size:12px;color:#6b7280;font-weight:400">(por total pagado${nProv>TOP_N?` — de ${nProv}`:''})</span>`;
+    _renderTopClientes(dataOrdenada, wrapClientes);
+    _renderTopProveedores(dataOrdenada, wrapProveedores);
+    // Tabla completa abajo con todas las columnas y ordenamiento dinámico
+    const dataFull = _ordenar(dataFiltrada, sortKey, sortDir);
+    tituloTodos.textContent = `Tabla completa (${dataFull.length} registros)`;
     panelTodos.style.display = '';
-    _renderTabla(data, wrapTodos);
+    _renderTabla(dataFull, wrapTodos);
   } else {
-    titulo.textContent = modoOps ? 'Tabla principal' : 'Tabla principal';
-    _renderTabla(data, wrapTop);
+    // Modo catálogo: solo una tabla con el detalle del match
+    _renderTabla(dataOrdenada, wrapClientes);
+    wrapProveedores.innerHTML = '<div class="empty">Sube Excel de compras para ver proveedores</div>';
     panelTodos.style.display = 'none';
   }
 }
