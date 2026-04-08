@@ -234,6 +234,10 @@ const norm = s => (s||'').toString().trim().toUpperCase().replace(/[.,]/g,'').re
 const STOPWORDS = new Set(['LTD','LTDA','LIMITED','INC','GMBH','SA','SAS','SRL','LLC','CO','CORP','COMPANY','PVT','SPA','BV','AG','KG','AB','AS','OY','SL','DE','CV','SP','ZRT','KFT','FZC','FZCO','FZE','NV','S','R','L','Z','O','THE','AND','OF','VE','TIC','TICARET','LDA','SAN','SRO','RL']);
 // Aliases para corregir typos / variantes conocidas (token -> token canónico)
 const TOKEN_ALIASES = {'TIMECRTI':'TIMECRITI'};
+const NORMALIZED_ALIASES = {
+  'TIME MATTERS AMERICAS': 'TIME MATTERS',
+  'TIME MATTERS AMERICAS INC': 'TIME MATTERS'
+};
 function tokenizeCore(s) {
   let x = (s||'').toString().toUpperCase();
   x = x.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -244,7 +248,8 @@ function tokenizeCore(s) {
     .map(t => TOKEN_ALIASES[t] || t);
 }
 function normCore(s) {
-  return tokenizeCore(s).join(' ').trim();
+  const normalized = tokenizeCore(s).join(' ').trim();
+  return NORMALIZED_ALIASES[normalized] || normalized;
 }
 
 function buscarNombreCatalogo(rawName, catIndex, catalogoPreparado) {
@@ -580,22 +585,26 @@ function renderInfoCompras() {
 // ==== EVENT LISTENERS DE LOS UPLOADS DE OPERACIÓN ====
 document.getElementById('fileVentas').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
-  leerExcelComoMatriz(f, matriz => {
-    opsVentas = procesarVentas(matriz);
-    opsVentas.archivo = f.name;
-    guardarOps();
-    renderInfoVentas();
-    if (typeof actualizar === 'function') actualizar();
+  refrescarCatalogos().then(() => {
+    leerExcelComoMatriz(f, matriz => {
+      opsVentas = procesarVentas(matriz);
+      opsVentas.archivo = f.name;
+      guardarOps();
+      renderInfoVentas();
+      if (typeof actualizar === 'function') actualizar();
+    });
   });
 });
 document.getElementById('fileCompras').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
-  leerExcelComoMatriz(f, matriz => {
-    opsCompras = procesarCompras(matriz);
-    opsCompras.archivo = f.name;
-    guardarOps();
-    renderInfoCompras();
-    if (typeof actualizar === 'function') actualizar();
+  refrescarCatalogos().then(() => {
+    leerExcelComoMatriz(f, matriz => {
+      opsCompras = procesarCompras(matriz);
+      opsCompras.archivo = f.name;
+      guardarOps();
+      renderInfoCompras();
+      if (typeof actualizar === 'function') actualizar();
+    });
   });
 });
 document.getElementById('btnLimpiarOps').addEventListener('click', () => {
@@ -661,6 +670,11 @@ async function cargarGuardado(url) {
 }
 
 async function inicializar() {
+  await refrescarCatalogos();
+  actualizar();
+}
+
+async function refrescarCatalogos() {
   const [c, p] = await Promise.all([
     cargarGuardado('data/clientes.json'),
     cargarGuardado('data/proveedores.json')
@@ -678,7 +692,6 @@ async function inicializar() {
     document.getElementById('infoProveedores').textContent =
       `${datosProveedores.length} proveedores en catálogo` + (p.actualizado ? ` · act. ${p.actualizado}` : '');
   }
-  actualizar();
 }
 
 inicializar();
