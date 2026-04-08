@@ -229,12 +229,16 @@ const norm = s => (s||'').toString().trim().toUpperCase().replace(/[.,]/g,'').re
 
 // Normalización agresiva: quita acentos, paréntesis, puntuación y sufijos de empresa
 const STOPWORDS = new Set(['LTD','LTDA','LIMITED','INC','GMBH','SA','SAS','SRL','LLC','CO','CORP','COMPANY','PVT','SPA','BV','AG','KG','AB','AS','OY','SL','DE','CV','SP','ZRT','KFT','FZC','FZCO','FZE','NV','S','R','L','Z','O','THE','AND','OF','VE','TIC','TICARET','LDA','SAN','SRO','RL']);
+// Aliases para corregir typos / variantes conocidas (token -> token canónico)
+const TOKEN_ALIASES = {'TIMECRTI':'TIMECRITI'};
 function normCore(s) {
   let x = (s||'').toString().toUpperCase();
   x = x.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   x = x.replace(/\([^)]*\)/g, ' ');
   x = x.replace(/[.,;:'"&\-\/+]/g, ' ');
-  const tokens = x.split(/\s+/).filter(t => t && !STOPWORDS.has(t));
+  const tokens = x.split(/\s+/)
+    .filter(t => t && !STOPWORDS.has(t))
+    .map(t => TOKEN_ALIASES[t] || t);
   return tokens.join(' ').trim();
 }
 
