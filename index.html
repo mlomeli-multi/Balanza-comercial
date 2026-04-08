@@ -40,6 +40,10 @@
   .num { text-align: right; font-variant-numeric: tabular-nums; }
   .pos { color: #059669; font-weight: 600; }
   .neg { color: #dc2626; font-weight: 600; }
+  tr.utilidad-neg td { background: #fef2f2; }
+  tr.utilidad-neg td.num.neg { background: #fee2e2; }
+  .badge.cliente_op { background: #dbeafe; color: #1e40af; }
+  .badge.proveedor_op { background: #f3e8ff; color: #6b21a8; }
   .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .chart-box { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
   .chart-box h2 { margin: 0 0 12px; font-size: 16px; }
@@ -59,22 +63,16 @@
   <p>Compara tus clientes contra tus proveedores e identifica oportunidades ganar/ganar</p>
 </header>
 <main>
-  <div class="help">
-    <strong>Cómo usar:</strong> Sube dos archivos Excel (.xlsx o .xls). Cada archivo debe tener una columna con el <b>nombre de la empresa</b> y otra con el <b>monto</b> (ventas o compras). El sistema detectará columnas automáticamente y cruzará los datos.
-  </div>
-
-  <div id="estadoCarga" class="help" style="display:none;background:#ecfdf5;border-color:#10b981">
-    Cargando datos guardados…
-  </div>
+  <div id="estadoCarga" class="help" style="display:none">Cargando…</div>
 
   <div class="uploads">
     <div class="upload clientes">
-      <h2>Clientes (lo que te compran)</h2>
+      <h2>Catálogo de Clientes</h2>
       <input type="file" id="fileClientes" accept=".xlsx,.xls,.csv">
       <div class="info" id="infoClientes">Sin archivo</div>
     </div>
     <div class="upload proveedores">
-      <h2>Proveedores (a quienes les compras)</h2>
+      <h2>Catálogo de Proveedores</h2>
       <input type="file" id="fileProveedores" accept=".xlsx,.xls,.csv">
       <div class="info" id="infoProveedores">Sin archivo</div>
     </div>
@@ -100,16 +98,12 @@
     <div style="margin-top:12px"><button id="btnLimpiarOps" style="background:#dc2626">Limpiar datos de operación</button></div>
   </div>
 
-  <div class="grid cards">
-    <div class="card"><h3>Total Ventas</h3><div class="val" id="kpiVentas">-</div><div class="sub" id="kpiVentasSub">clientes</div></div>
-    <div class="card"><h3>Total Compras</h3><div class="val" id="kpiCompras">-</div><div class="sub" id="kpiComprasSub">proveedores</div></div>
-    <div class="card"><h3>Balanza Neta</h3><div class="val" id="kpiBalanza">-</div><div class="sub">ventas - compras</div></div>
-    <div class="card"><h3>Relaciones Bilaterales</h3><div class="val" id="kpiBilat">-</div><div class="sub">empresas en ambas listas</div></div>
+  <div class="grid cards" id="kpisWrap">
+    <!-- Se llena dinámicamente desde JS -->
   </div>
 
-  <div class="charts">
-    <div class="chart-box"><h2>Top 10 Clientes</h2><canvas id="chartClientes"></canvas></div>
-    <div class="chart-box"><h2>Top 10 Proveedores</h2><canvas id="chartProveedores"></canvas></div>
+  <div class="charts" id="chartsWrap" style="display:none">
+    <!-- Las gráficas se construyen en el Commit C -->
   </div>
 
   <div class="panel" style="margin-top:24px">
@@ -119,7 +113,7 @@
   </div>
 
   <div class="panel">
-    <h2>Tabla Combinada</h2>
+    <h2 id="tituloTabla">Tabla principal</h2>
     <div class="toolbar">
       <input type="text" id="search" placeholder="Buscar empresa...">
       <select id="filtro">
@@ -127,10 +121,17 @@
         <option value="ambos">Solo bilaterales</option>
         <option value="cliente">Solo clientes</option>
         <option value="proveedor">Solo proveedores</option>
+        <option value="con_venta">Con venta</option>
+        <option value="con_compra">Con compra</option>
       </select>
       <button id="exportBtn">Exportar Excel</button>
     </div>
     <div id="tablaWrap"><div class="empty">Sin datos</div></div>
+  </div>
+
+  <div class="panel" id="panelTodos" style="display:none">
+    <h2>Tabla completa (todos los registros)</h2>
+    <div id="tablaTodosWrap"></div>
   </div>
 </main>
 
@@ -550,131 +551,154 @@ async function cargarGuardado(url) {
 }
 
 async function inicializar() {
-  const estado = document.getElementById('estadoCarga');
-  estado.style.display = 'block';
-  estado.textContent = 'Buscando datos guardados…';
-
   const [c, p] = await Promise.all([
     cargarGuardado('data/clientes.json'),
     cargarGuardado('data/proveedores.json')
   ]);
 
-  let cargo = false;
   if (c && c.registros.length) {
     datosClientes = c.registros.map(r => ({nombre: r.nombre, monto: Number(r.monto)||0}))
-      .sort((a,b)=>b.monto-a.monto || a.nombre.localeCompare(b.nombre));
+      .sort((a,b)=>a.nombre.localeCompare(b.nombre));
     document.getElementById('infoClientes').textContent =
-      `Datos guardados — ${datosClientes.length} clientes` + (c.actualizado ? ` (act. ${c.actualizado})` : '');
-    cargo = true;
+      `${datosClientes.length} clientes en catálogo` + (c.actualizado ? ` · act. ${c.actualizado}` : '');
   }
   if (p && p.registros.length) {
     datosProveedores = p.registros.map(r => ({nombre: r.nombre, monto: Number(r.monto)||0}))
-      .sort((a,b)=>b.monto-a.monto || a.nombre.localeCompare(b.nombre));
+      .sort((a,b)=>a.nombre.localeCompare(b.nombre));
     document.getElementById('infoProveedores').textContent =
-      `Datos guardados — ${datosProveedores.length} proveedores` + (p.actualizado ? ` (act. ${p.actualizado})` : '');
-    cargo = true;
+      `${datosProveedores.length} proveedores en catálogo` + (p.actualizado ? ` · act. ${p.actualizado}` : '');
   }
-
-  if (cargo) {
-    estado.style.background = '#ecfdf5';
-    estado.innerHTML = '<strong>Listo:</strong> mostrando datos guardados en el repositorio. (En el Paso 2 podrás subir Excel nuevos y se guardarán automáticamente.)';
-    actualizar();
-  } else {
-    estado.style.display = 'none';
-  }
+  actualizar();
 }
 
 inicializar();
 
-let modoConMontos = false;
+let modoOps = false;          // hay datos de operación cargados
+let monedasCompra = [];       // ['USD','EUR',...] dinámico
+
+function fmtMoneda(n, mon) {
+  if (mon === 'USD') return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n||0);
+  if (mon === 'EUR') return new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n||0);
+  if (mon === 'MXN') return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n||0);
+  return new Intl.NumberFormat('es-MX',{maximumFractionDigits:0}).format(n||0) + ' ' + mon;
+}
 
 function actualizar() {
-  // Construir mapa por clave normalizada (matching difuso por raíz del nombre)
+  modoOps = !!(opsVentas || opsCompras);
+  monedasCompra = opsCompras ? (opsCompras.monedas || []) : [];
+
+  // Construir combinado: catálogo de clientes/proveedores + datos de operación si existen
   const map = new Map();
+
+  // 1. Sembrar con catálogo
   for (const c of datosClientes) {
     const k = normCore(c.nombre);
     if (!k) continue;
-    if (!map.has(k)) map.set(k, {clave:k, nombreCliente:c.nombre, nombreProveedor:null, ventas:c.monto||0, compras:0});
-    else { const e = map.get(k); e.nombreCliente = e.nombreCliente || c.nombre; e.ventas += c.monto||0; }
+    if (!map.has(k)) map.set(k, _emptyRow(c.nombre, null));
+    else map.get(k).nombreCliente = map.get(k).nombreCliente || c.nombre;
   }
   for (const p of datosProveedores) {
     const k = normCore(p.nombre);
     if (!k) continue;
-    if (!map.has(k)) map.set(k, {clave:k, nombreCliente:null, nombreProveedor:p.nombre, ventas:0, compras:p.monto||0});
-    else { const e = map.get(k); e.nombreProveedor = e.nombreProveedor || p.nombre; e.compras += p.monto||0; }
+    if (!map.has(k)) map.set(k, _emptyRow(null, p.nombre));
+    else map.get(k).nombreProveedor = map.get(k).nombreProveedor || p.nombre;
   }
 
-  combinado = [...map.values()].map(r => ({
-    nombre: r.nombreCliente || r.nombreProveedor,
-    nombreCliente: r.nombreCliente,
-    nombreProveedor: r.nombreProveedor,
-    ventas: r.ventas,
-    compras: r.compras,
-    balanza: r.ventas - r.compras,
-    tipo: (r.nombreCliente && r.nombreProveedor) ? 'ambos' : (r.nombreCliente ? 'cliente' : 'proveedor')
-  }));
-
-  const totV = datosClientes.reduce((s,x)=>s+(x.monto||0),0);
-  const totC = datosProveedores.reduce((s,x)=>s+(x.monto||0),0);
-  modoConMontos = totV > 0 || totC > 0;
-
-  // KPIs adaptativos
-  const cardVentas = document.getElementById('kpiVentas');
-  const cardCompras = document.getElementById('kpiCompras');
-  const cardBal = document.getElementById('kpiBalanza');
-  const tituloV = cardVentas.parentElement.querySelector('h3');
-  const tituloC = cardCompras.parentElement.querySelector('h3');
-
-  if (modoConMontos) {
-    tituloV.textContent = 'Total Ventas';
-    tituloC.textContent = 'Total Compras';
-    cardVentas.textContent = fmt(totV);
-    cardCompras.textContent = fmt(totC);
-    const bal = totV - totC;
-    cardBal.textContent = fmt(bal);
-    cardBal.className = 'val ' + (bal>=0?'pos':'neg');
-  } else {
-    tituloV.textContent = 'Clientes';
-    tituloC.textContent = 'Proveedores';
-    cardVentas.textContent = datosClientes.length;
-    cardVentas.className = 'val';
-    cardCompras.textContent = datosProveedores.length;
-    cardCompras.className = 'val';
-    cardBal.textContent = '—';
-    cardBal.className = 'val';
+  // 2. Inyectar datos de ops (ventas)
+  if (opsVentas) {
+    for (const [k, v] of Object.entries(opsVentas.registros||{})) {
+      if (!map.has(k)) map.set(k, _emptyRow(v.nombre, null));
+      const r = map.get(k);
+      r.venta_usd = v.ingreso_usd || 0;
+      r.utilidad_usd = v.utilidad_usd || 0;
+      r.embarques_venta = v.embarques || 0;
+      r.porCategoriaVenta = v.porCategoria || {};
+      r.porSubcategoriaVenta = v.porSubcategoria || {};
+    }
   }
-  document.getElementById('kpiVentasSub').textContent = `${datosClientes.length} en lista`;
-  document.getElementById('kpiComprasSub').textContent = `${datosProveedores.length} en lista`;
-  document.getElementById('kpiBilat').textContent = combinado.filter(r=>r.tipo==='ambos').length;
+  // 3. Inyectar datos de ops (compras)
+  if (opsCompras) {
+    for (const [k, v] of Object.entries(opsCompras.registros||{})) {
+      if (!map.has(k)) map.set(k, _emptyRow(null, v.nombre));
+      const r = map.get(k);
+      r.compras = v.compras || {};
+      r.embarques_compra = v.embarques || 0;
+      r.porCategoriaCompra = v.porCategoria || {};
+      r.porSubcategoriaCompra = v.porSubcategoria || {};
+    }
+  }
 
-  pintarCharts();
+  combinado = [...map.values()].map(r => {
+    r.tipo = (r.nombreCliente && r.nombreProveedor) ? 'ambos' : (r.nombreCliente ? 'cliente' : 'proveedor');
+    r.nombre = r.nombreCliente || r.nombreProveedor;
+    r.balanza_usd = (r.venta_usd||0) - (r.compras['USD']||0);
+    r.margen_pct = r.venta_usd ? (r.utilidad_usd/r.venta_usd*100) : null;
+    r.tieneVenta = (r.venta_usd||0) > 0 || (r.embarques_venta||0) > 0;
+    r.tieneCompra = Object.keys(r.compras||{}).length > 0 || (r.embarques_compra||0) > 0;
+    return r;
+  });
+
+  pintarKpis();
   pintarBilaterales();
   pintarTabla();
 }
 
-function pintarCharts() {
-  if (chartC) { chartC.destroy(); chartC = null; }
-  if (chartP) { chartP.destroy(); chartP = null; }
-  const boxC = document.getElementById('chartClientes').parentElement;
-  const boxP = document.getElementById('chartProveedores').parentElement;
-  if (!modoConMontos) {
-    boxC.style.display = 'none';
-    boxP.style.display = 'none';
-    return;
+function _emptyRow(nombreCliente, nombreProveedor) {
+  return {
+    nombreCliente, nombreProveedor,
+    venta_usd: 0,
+    utilidad_usd: 0,
+    embarques_venta: 0,
+    embarques_compra: 0,
+    compras: {},
+    porCategoriaVenta: {},
+    porSubcategoriaVenta: {},
+    porCategoriaCompra: {},
+    porSubcategoriaCompra: {}
+  };
+}
+
+function pintarKpis() {
+  const wrap = document.getElementById('kpisWrap');
+  const card = (titulo, valor, sub, extraClass='') => `<div class="card"><h3>${titulo}</h3><div class="val ${extraClass}">${valor}</div><div class="sub">${sub}</div></div>`;
+
+  let html = '';
+  const bilaterales = combinado.filter(r => r.tipo === 'ambos').length;
+
+  if (!modoOps) {
+    html += card('Clientes', datosClientes.length, 'en catálogo');
+    html += card('Proveedores', datosProveedores.length, 'en catálogo');
+    html += card('Bilaterales', bilaterales, 'cliente y proveedor');
+    html += card('Estado', 'Catálogo', 'sin datos de operación');
+  } else {
+    // Venta USD
+    if (opsVentas) {
+      const margenPct = opsVentas.total_usd ? (opsVentas.utilidad_usd/opsVentas.total_usd*100) : 0;
+      html += card('Venta ' + ANIO_ACTUAL + ' (USD)', fmtMoneda(opsVentas.total_usd, 'USD'),
+        `${opsVentas.procesadas} embarques · ${Object.keys(opsVentas.registros||{}).length} clientes`);
+      html += card('Utilidad ' + ANIO_ACTUAL + ' (USD)', fmtMoneda(opsVentas.utilidad_usd, 'USD'),
+        `Margen ${margenPct.toFixed(1)}%`,
+        opsVentas.utilidad_usd < 0 ? 'neg' : 'pos');
+    }
+    // Compras (una tarjeta por moneda)
+    if (opsCompras) {
+      const totales = opsCompras.totalesPorMoneda || {};
+      for (const mon of monedasCompra) {
+        html += card('Compras ' + ANIO_ACTUAL + ' (' + mon + ')', fmtMoneda(totales[mon]||0, mon),
+          `${Object.keys(opsCompras.registros||{}).length} proveedores`);
+      }
+    }
+    // Balanza USD (solo si hay venta y compra USD)
+    if (opsVentas && opsCompras && (opsCompras.totalesPorMoneda||{})['USD']) {
+      const bal = opsVentas.total_usd - (opsCompras.totalesPorMoneda['USD']||0);
+      html += card('Balanza USD', fmtMoneda(bal,'USD'), 'venta − compras', bal>=0?'pos':'neg');
+    }
+    // Bilaterales con operación
+    const bilOps = combinado.filter(r => r.tipo==='ambos' && (r.tieneVenta || r.tieneCompra)).length;
+    html += card('Bilaterales activos', bilOps, `${bilaterales} en catálogo`);
   }
-  boxC.style.display = '';
-  boxP.style.display = '';
-  const top = (arr,n) => arr.slice(0,n);
-  const tc = top(datosClientes,10);
-  const tp = top(datosProveedores,10);
-  chartC = new Chart(document.getElementById('chartClientes'),{
-    type:'bar', data:{labels:tc.map(x=>x.nombre.slice(0,20)), datasets:[{label:'Ventas',data:tc.map(x=>x.monto),backgroundColor:'#10b981'}]},
-    options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>fmt(v)}}}}
-  });
-  chartP = new Chart(document.getElementById('chartProveedores'),{
-    type:'bar', data:{labels:tp.map(x=>x.nombre.slice(0,20)), datasets:[{label:'Compras',data:tp.map(x=>x.monto),backgroundColor:'#f59e0b'}]},
-    options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>fmt(v)}}}}
-  });
+
+  wrap.innerHTML = html;
 }
 
 function pintarBilaterales() {
@@ -682,70 +706,173 @@ function pintarBilaterales() {
   const wrap = document.getElementById('bilateralWrap');
   if (!bil.length) { wrap.innerHTML = '<div class="empty">No hay empresas que sean cliente y proveedor a la vez</div>'; return; }
 
-  if (modoConMontos) {
-    bil.sort((a,b)=>Math.abs(b.balanza)-Math.abs(a.balanza));
-    let html = '<table><thead><tr><th>Empresa</th><th class="num">Te compran</th><th class="num">Les compras</th><th class="num">Balanza</th><th>Oportunidad</th></tr></thead><tbody>';
+  if (modoOps) {
+    // ordenar por suma de actividad (venta USD + compras USD), luego nombre
+    bil.sort((a,b) => {
+      const aTot = (a.venta_usd||0) + (a.compras['USD']||0);
+      const bTot = (b.venta_usd||0) + (b.compras['USD']||0);
+      return bTot - aTot;
+    });
+    const monedasHdr = monedasCompra.map(m => `<th class="num">Compras ${m}</th>`).join('');
+    let html = `<p style="font-size:13px;color:#374151;margin:0 0 12px"><b>${bil.length} relaciones bilaterales</b> en el catálogo. Para cada una se muestra venta y compras del año en curso.</p>`;
+    html += `<table><thead><tr><th>Empresa</th><th class="num">Venta USD</th><th class="num">Utilidad USD</th>${monedasHdr}<th class="num">Balanza USD</th><th>Oportunidad</th></tr></thead><tbody>`;
     for (const r of bil) {
-      const op = r.balanza > 0 ? 'Tú vendes más → tienes palanca de negociación' : (r.balanza < 0 ? 'Les compras más → exige mayor reciprocidad' : 'Equilibrio perfecto');
-      html += `<tr><td><b>${r.nombre}</b></td><td class="num">${fmt(r.ventas)}</td><td class="num">${fmt(r.compras)}</td><td class="num ${r.balanza>=0?'pos':'neg'}">${fmt(r.balanza)}</td><td style="font-size:12px">${op}</td></tr>`;
+      const oportunidad = _oportunidadTexto(r);
+      const negClass = (r.utilidad_usd||0) < 0 ? 'utilidad-neg' : '';
+      let row = `<tr class="${negClass}"><td><b>${escapeHtml(r.nombre)}</b></td>`;
+      row += `<td class="num">${r.venta_usd?fmtMoneda(r.venta_usd,'USD'):'—'}</td>`;
+      row += `<td class="num ${(r.utilidad_usd||0)<0?'neg':''}">${r.venta_usd?fmtMoneda(r.utilidad_usd,'USD'):'—'}</td>`;
+      for (const m of monedasCompra) {
+        const v = (r.compras||{})[m] || 0;
+        row += `<td class="num">${v?fmtMoneda(v,m):'—'}</td>`;
+      }
+      row += `<td class="num ${r.balanza_usd>=0?'pos':'neg'}">${(r.venta_usd||r.compras['USD'])?fmtMoneda(r.balanza_usd,'USD'):'—'}</td>`;
+      row += `<td style="font-size:11px">${oportunidad}</td></tr>`;
+      html += row;
     }
     html += '</tbody></table>';
     wrap.innerHTML = html;
   } else {
     bil.sort((a,b)=>a.nombre.localeCompare(b.nombre));
-    let html = `<p style="font-size:13px;color:#374151;margin:0 0 12px"><b>${bil.length} coincidencias</b> entre tu lista de clientes y tu lista de proveedores (matching difuso por nombre — verifica que sean correctas).</p>`;
+    let html = `<p style="font-size:13px;color:#374151;margin:0 0 12px"><b>${bil.length} coincidencias</b> entre tu catálogo de clientes y proveedores. Sube los Excel de operación para ver venta, utilidad y compras de cada uno.</p>`;
     html += '<table><thead><tr><th>#</th><th>Nombre como cliente</th><th>Nombre como proveedor</th></tr></thead><tbody>';
     bil.forEach((r,i) => {
-      html += `<tr><td>${i+1}</td><td>${r.nombreCliente||''}</td><td>${r.nombreProveedor||''}</td></tr>`;
+      html += `<tr><td>${i+1}</td><td>${escapeHtml(r.nombreCliente||'')}</td><td>${escapeHtml(r.nombreProveedor||'')}</td></tr>`;
     });
     html += '</tbody></table>';
     wrap.innerHTML = html;
   }
 }
 
-let sortKey = 'nombre', sortDir = 1;
-function pintarTabla() {
+function _oportunidadTexto(r) {
+  const v = r.venta_usd || 0;
+  const cUsd = (r.compras||{})['USD'] || 0;
+  if (!v && !cUsd) return 'Sin actividad en el año';
+  if (v && !cUsd) return 'Solo te compran. Pídeles que te contraten también.';
+  if (!v && cUsd) return 'Solo les compras. Ofréceles servicios para reciprocidad.';
+  if (r.balanza_usd > 0) return 'Vendes más de lo que les compras. Tienes palanca.';
+  if (r.balanza_usd < 0) return 'Les compras más. Exige mayor reciprocidad.';
+  return 'Equilibrado.';
+}
+
+function escapeHtml(s) {
+  return (s||'').toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+const TOP_N = 25;
+let sortKey = 'venta_usd', sortDir = -1;
+
+function _filtrar() {
   const q = document.getElementById('search').value.toUpperCase();
   const f = document.getElementById('filtro').value;
   let data = combinado.filter(r => (r.nombre||'').toUpperCase().includes(q));
-  if (f !== 'todos') data = data.filter(r => r.tipo === f);
-  data.sort((a,b) => {
-    const va = a[sortKey], vb = b[sortKey];
-    if (typeof va === 'string') return va.localeCompare(vb||'') * sortDir;
-    return ((va||0) > (vb||0) ? 1 : -1) * sortDir;
-  });
-  const wrap = document.getElementById('tablaWrap');
-  if (!data.length) { wrap.innerHTML = '<div class="empty">Sin resultados</div>'; return; }
+  if (f === 'ambos') data = data.filter(r => r.tipo === 'ambos');
+  else if (f === 'cliente') data = data.filter(r => r.tipo === 'cliente');
+  else if (f === 'proveedor') data = data.filter(r => r.tipo === 'proveedor');
+  else if (f === 'con_venta') data = data.filter(r => r.tieneVenta);
+  else if (f === 'con_compra') data = data.filter(r => r.tieneCompra);
+  return data;
+}
 
+function _ordenar(data, key, dir) {
+  return data.slice().sort((a,b) => {
+    let va = a[key], vb = b[key];
+    if (key.startsWith('compras_')) {
+      const m = key.replace('compras_','');
+      va = (a.compras||{})[m] || 0;
+      vb = (b.compras||{})[m] || 0;
+    }
+    if (typeof va === 'string' || typeof vb === 'string') return (va||'').localeCompare(vb||'') * dir;
+    return ((va||0) > (vb||0) ? 1 : -1) * dir;
+  });
+}
+
+function _renderTabla(data, contenedor) {
+  if (!data.length) { contenedor.innerHTML = '<div class="empty">Sin resultados</div>'; return; }
   let html;
-  if (modoConMontos) {
-    html = '<table><thead><tr><th data-k="nombre">Empresa</th><th data-k="tipo">Tipo</th><th class="num" data-k="ventas">Ventas</th><th class="num" data-k="compras">Compras</th><th class="num" data-k="balanza">Balanza</th></tr></thead><tbody>';
+
+  if (modoOps) {
+    const monedasHdr = monedasCompra.map(m => `<th class="num" data-k="compras_${m}">Compras ${m}</th>`).join('');
+    html = `<table><thead><tr>
+      <th data-k="nombre">Empresa</th>
+      <th data-k="tipo">Tipo</th>
+      <th class="num" data-k="venta_usd">Venta USD</th>
+      <th class="num" data-k="utilidad_usd">Utilidad USD</th>
+      <th class="num" data-k="margen_pct">% Margen</th>
+      ${monedasHdr}
+      <th class="num" data-k="embarques_venta">Emb. venta</th>
+      <th class="num" data-k="embarques_compra">Emb. compra</th>
+    </tr></thead><tbody>`;
     for (const r of data) {
-      html += `<tr><td>${r.nombre}</td><td><span class="badge ${r.tipo}">${r.tipo}</span></td><td class="num">${fmt(r.ventas)}</td><td class="num">${fmt(r.compras)}</td><td class="num ${r.balanza>=0?'pos':'neg'}">${fmt(r.balanza)}</td></tr>`;
+      const negClass = (r.utilidad_usd||0) < 0 ? 'utilidad-neg' : '';
+      const tipoBadge = r.tipo;
+      const margen = r.margen_pct === null ? '—' : r.margen_pct.toFixed(1)+'%';
+      html += `<tr class="${negClass}">`;
+      html += `<td>${escapeHtml(r.nombre)}</td>`;
+      html += `<td><span class="badge ${tipoBadge}">${tipoBadge}</span></td>`;
+      html += `<td class="num">${r.venta_usd?fmtMoneda(r.venta_usd,'USD'):'—'}</td>`;
+      html += `<td class="num ${(r.utilidad_usd||0)<0?'neg':((r.utilidad_usd||0)>0?'pos':'')}">${r.venta_usd?fmtMoneda(r.utilidad_usd,'USD'):'—'}</td>`;
+      html += `<td class="num">${margen}</td>`;
+      for (const m of monedasCompra) {
+        const v = (r.compras||{})[m] || 0;
+        html += `<td class="num">${v?fmtMoneda(v,m):'—'}</td>`;
+      }
+      html += `<td class="num">${r.embarques_venta||'—'}</td>`;
+      html += `<td class="num">${r.embarques_compra||'—'}</td>`;
+      html += '</tr>';
     }
   } else {
     html = '<table><thead><tr><th data-k="nombre">Empresa</th><th data-k="tipo">Tipo</th><th>Como cliente</th><th>Como proveedor</th></tr></thead><tbody>';
     for (const r of data) {
-      html += `<tr><td>${r.nombre}</td><td><span class="badge ${r.tipo}">${r.tipo}</span></td><td style="font-size:12px;color:#6b7280">${r.nombreCliente||'—'}</td><td style="font-size:12px;color:#6b7280">${r.nombreProveedor||'—'}</td></tr>`;
+      html += `<tr><td>${escapeHtml(r.nombre)}</td><td><span class="badge ${r.tipo}">${r.tipo}</span></td><td style="font-size:12px;color:#6b7280">${escapeHtml(r.nombreCliente||'—')}</td><td style="font-size:12px;color:#6b7280">${escapeHtml(r.nombreProveedor||'—')}</td></tr>`;
     }
   }
   html += '</tbody></table>';
-  wrap.innerHTML = html;
-  wrap.querySelectorAll('th[data-k]').forEach(th => th.addEventListener('click', () => {
+  contenedor.innerHTML = html;
+  contenedor.querySelectorAll('th[data-k]').forEach(th => th.addEventListener('click', () => {
     const k = th.dataset.k;
     if (sortKey === k) sortDir *= -1; else { sortKey = k; sortDir = (k==='nombre'||k==='tipo')?1:-1; }
     pintarTabla();
   }));
 }
 
+function pintarTabla() {
+  const data = _ordenar(_filtrar(), sortKey, sortDir);
+  const wrapTop = document.getElementById('tablaWrap');
+  const panelTodos = document.getElementById('panelTodos');
+  const wrapTodos = document.getElementById('tablaTodosWrap');
+  const titulo = document.getElementById('tituloTabla');
+
+  if (modoOps && data.length > TOP_N) {
+    titulo.textContent = `Top ${TOP_N} (de ${data.length})`;
+    _renderTabla(data.slice(0, TOP_N), wrapTop);
+    panelTodos.style.display = '';
+    _renderTabla(data, wrapTodos);
+  } else {
+    titulo.textContent = modoOps ? 'Tabla principal' : 'Tabla principal';
+    _renderTabla(data, wrapTop);
+    panelTodos.style.display = 'none';
+  }
+}
+
 document.getElementById('search').addEventListener('input', pintarTabla);
 document.getElementById('filtro').addEventListener('change', pintarTabla);
 document.getElementById('exportBtn').addEventListener('click', () => {
   if (!combinado.length) return alert('No hay datos');
-  const ws = XLSX.utils.json_to_sheet(combinado.map(r => modoConMontos
-    ? ({Empresa:r.nombre, Tipo:r.tipo, Ventas:r.ventas, Compras:r.compras, Balanza:r.balanza})
-    : ({Empresa:r.nombre, Tipo:r.tipo, ComoCliente:r.nombreCliente||'', ComoProveedor:r.nombreProveedor||''})
-  ));
+  const rows = combinado.map(r => {
+    if (modoOps) {
+      const o = {
+        Empresa: r.nombre, Tipo: r.tipo,
+        Venta_USD: r.venta_usd||0, Utilidad_USD: r.utilidad_usd||0,
+        Margen_pct: r.margen_pct===null ? '' : r.margen_pct.toFixed(2),
+        Emb_venta: r.embarques_venta||0, Emb_compra: r.embarques_compra||0
+      };
+      for (const m of monedasCompra) o['Compras_'+m] = (r.compras||{})[m] || 0;
+      return o;
+    }
+    return {Empresa:r.nombre, Tipo:r.tipo, ComoCliente:r.nombreCliente||'', ComoProveedor:r.nombreProveedor||''};
+  });
+  const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Balanza');
   XLSX.writeFile(wb, 'balanza_comercial.xlsx');
