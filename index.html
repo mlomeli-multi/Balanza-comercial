@@ -149,7 +149,7 @@
 let datosClientes = [];
 let datosProveedores = [];
 let combinado = [];
-let chartC = null, chartP = null;
+let chartC = null, chartP = null, chartPieVenta = null;
 
 // Datos de operación (ventas / compras procesadas desde Excel)
 let opsVentas = null;   // {actualizado, archivo, total_usd, utilidad_usd, registros:{...}, descartados:{...}}
@@ -653,6 +653,7 @@ function actualizar() {
   });
 
   pintarKpis();
+  pintarCharts();
   pintarBilaterales();
   pintarTabla();
 }
@@ -713,6 +714,221 @@ function pintarKpis() {
   }
 
   wrap.innerHTML = html;
+}
+
+function destruirChart(chart) {
+  if (chart) chart.destroy();
+}
+
+function _sumarVentasPorCategoria() {
+  const resumen = new Map();
+  for (const reg of Object.values((opsVentas && opsVentas.registros) || {})) {
+    for (const [cat, data] of Object.entries(reg.porCategoria || {})) {
+      if (!resumen.has(cat)) resumen.set(cat, { cat, ingreso: 0, utilidad: 0, count: 0 });
+      const item = resumen.get(cat);
+      item.ingreso += data.ingreso || 0;
+      item.utilidad += data.utilidad || 0;
+      item.count += data.count || 0;
+    }
+  }
+  return [...resumen.values()].sort((a, b) => b.ingreso - a.ingreso);
+}
+
+function _sumarVentasPorSubcategoria() {
+  const resumen = new Map();
+  for (const reg of Object.values((opsVentas && opsVentas.registros) || {})) {
+    for (const [prefijo, data] of Object.entries(reg.porSubcategoria || {})) {
+      if (!resumen.has(prefijo)) {
+        resumen.set(prefijo, {
+          prefijo,
+          sub: data.sub || prefijo,
+          cat: data.cat || 'DESCONOCIDO',
+          ingreso: 0,
+          utilidad: 0,
+          count: 0
+        });
+      }
+      const item = resumen.get(prefijo);
+      item.ingreso += data.ingreso || 0;
+      item.utilidad += data.utilidad || 0;
+      item.count += data.count || 0;
+    }
+  }
+  return [...resumen.values()].sort((a, b) => b.ingreso - a.ingreso);
+}
+
+function pintarCharts() {
+  const wrap = document.getElementById('chartsWrap');
+  if (!modoOps || (!opsVentas && !opsCompras)) {
+    destruirChart(chartC); chartC = null;
+    destruirChart(chartP); chartP = null;
+    destruirChart(chartPieVenta); chartPieVenta = null;
+    wrap.style.display = 'none';
+    wrap.innerHTML = '';
+    return;
+  }
+
+  wrap.style.display = 'grid';
+  wrap.innerHTML = `
+    <div class="chart-box">
+      <h2>Top 10 clientes por venta USD</h2>
+      <canvas id="chartClientesVentas" height="280"></canvas>
+    </div>
+    <div class="chart-box">
+      <h2>Top 10 proveedores por compras USD</h2>
+      <canvas id="chartProveedoresUsd" height="280"></canvas>
+    </div>
+    <div class="chart-box">
+      <h2>Venta por categoría</h2>
+      <canvas id="chartPieCategoriaVenta" height="280"></canvas>
+    </div>
+    <div class="chart-box">
+      <h2>Venta por subcategoría</h2>
+      <div id="tablaSubcategoriasWrap"></div>
+    </div>
+  `;
+
+  const topClientes = combinado
+    .filter(r => r.tieneVenta)
+    .slice()
+    .sort((a, b) => (b.venta_usd || 0) - (a.venta_usd || 0))
+    .slice(0, 10);
+  const topProveedoresUsd = combinado
+    .filter(r => ((r.compras || {}).USD || 0) > 0)
+    .slice()
+    .sort((a, b) => (((b.compras || {}).USD || 0) - ((a.compras || {}).USD || 0)))
+    .slice(0, 10);
+  const categoriasVenta = _sumarVentasPorCategoria();
+  const subcategoriasVenta = _sumarVentasPorSubcategoria();
+
+  destruirChart(chartC);
+  destruirChart(chartP);
+  destruirChart(chartPieVenta);
+
+  const ctxClientes = document.getElementById('chartClientesVentas');
+  if (topClientes.length) {
+    chartC = new Chart(ctxClientes, {
+      type: 'bar',
+      data: {
+        labels: topClientes.map(r => r.nombre),
+        datasets: [{
+          label: 'Venta USD',
+          data: topClientes.map(r => r.venta_usd || 0),
+          backgroundColor: '#2563eb',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: { ticks: { maxRotation: 0, minRotation: 0 } },
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  } else {
+    ctxClientes.replaceWith(_emptyChartMessage('Sin ventas para graficar.'));
+    chartC = null;
+  }
+
+  const ctxProveedores = document.getElementById('chartProveedoresUsd');
+  if (topProveedoresUsd.length) {
+    chartP = new Chart(ctxProveedores, {
+      type: 'bar',
+      data: {
+        labels: topProveedoresUsd.map(r => r.nombre),
+        datasets: [{
+          label: 'Compras USD',
+          data: topProveedoresUsd.map(r => (r.compras || {}).USD || 0),
+          backgroundColor: '#7c3aed',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: { ticks: { maxRotation: 0, minRotation: 0 } },
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  } else {
+    ctxProveedores.replaceWith(_emptyChartMessage('Sin compras en USD para graficar.'));
+    chartP = null;
+  }
+
+  const ctxPie = document.getElementById('chartPieCategoriaVenta');
+  if (categoriasVenta.length) {
+    chartPieVenta = new Chart(ctxPie, {
+      type: 'pie',
+      data: {
+        labels: categoriasVenta.map(r => r.cat),
+        datasets: [{
+          data: categoriasVenta.map(r => r.ingreso || 0),
+          backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#7c3aed', '#ef4444']
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: {
+            callbacks: {
+              label: ctx => `${ctx.label}: ${fmtMoneda(ctx.parsed, 'USD')}`
+            }
+          }
+        }
+      }
+    });
+  } else {
+    ctxPie.replaceWith(_emptyChartMessage('Sin ventas clasificadas por categoría.'));
+    chartPieVenta = null;
+  }
+
+  _renderSubcategoriasVenta(subcategoriasVenta, document.getElementById('tablaSubcategoriasWrap'));
+}
+
+function _emptyChartMessage(texto) {
+  const div = document.createElement('div');
+  div.className = 'empty';
+  div.textContent = texto;
+  return div;
+}
+
+function _renderSubcategoriasVenta(data, contenedor) {
+  if (!data.length) {
+    contenedor.innerHTML = '<div class="empty">Sin subcategorías de venta para mostrar</div>';
+    return;
+  }
+  let html = `<table><thead><tr>
+    <th>Prefijo</th>
+    <th>Servicio</th>
+    <th>Categoría</th>
+    <th class="num">Venta USD</th>
+    <th class="num">Utilidad USD</th>
+    <th class="num">Emb.</th>
+  </tr></thead><tbody>`;
+  for (const item of data) {
+    html += `<tr>`;
+    html += `<td><b>${escapeHtml(item.prefijo)}</b></td>`;
+    html += `<td>${escapeHtml(item.sub)}</td>`;
+    html += `<td>${escapeHtml(item.cat)}</td>`;
+    html += `<td class="num">${fmtMoneda(item.ingreso || 0, 'USD')}</td>`;
+    html += `<td class="num ${(item.utilidad || 0) < 0 ? 'neg' : 'pos'}">${fmtMoneda(item.utilidad || 0, 'USD')}</td>`;
+    html += `<td class="num">${item.count || 0}</td>`;
+    html += `</tr>`;
+  }
+  html += '</tbody></table>';
+  contenedor.innerHTML = html;
 }
 
 function pintarBilaterales() {
