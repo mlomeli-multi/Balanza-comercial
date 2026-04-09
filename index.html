@@ -47,6 +47,8 @@
   .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .chart-box { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
   .chart-box h2 { margin: 0 0 12px; font-size: 16px; }
+  .chart-canvas-wrap { position: relative; height: 320px; min-height: 320px; max-height: 320px; overflow: hidden; }
+  .chart-canvas-wrap canvas { width: 100% !important; height: 100% !important; display: block; }
   .toolbar { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
   .toolbar input, .toolbar select { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; }
   .toolbar input { flex: 1; min-width: 200px; }
@@ -895,15 +897,15 @@ function pintarCharts() {
   wrap.innerHTML = `
     <div class="chart-box">
       <h2>Top 10 clientes por venta USD</h2>
-      <canvas id="chartClientesVentas" height="280"></canvas>
+      <div class="chart-canvas-wrap"><canvas id="chartClientesVentas"></canvas></div>
     </div>
     <div class="chart-box">
       <h2>Top 10 proveedores por compras USD</h2>
-      <canvas id="chartProveedoresUsd" height="280"></canvas>
+      <div class="chart-canvas-wrap"><canvas id="chartProveedoresUsd"></canvas></div>
     </div>
     <div class="chart-box">
       <h2>Venta por categoría</h2>
-      <canvas id="chartPieCategoriaVenta" height="280"></canvas>
+      <div class="chart-canvas-wrap"><canvas id="chartPieCategoriaVenta"></canvas></div>
     </div>
     <div class="chart-box">
       <h2>Venta por subcategoría</h2>
@@ -944,12 +946,13 @@ function pintarCharts() {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        indexAxis: 'y',
         plugins: {
           legend: { display: false }
         },
         scales: {
-          x: { ticks: { maxRotation: 0, minRotation: 0 } },
-          y: { beginAtZero: true }
+          x: { beginAtZero: true },
+          y: { ticks: { autoSkip: false } }
         }
       }
     });
@@ -974,12 +977,13 @@ function pintarCharts() {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        indexAxis: 'y',
         plugins: {
           legend: { display: false }
         },
         scales: {
-          x: { ticks: { maxRotation: 0, minRotation: 0 } },
-          y: { beginAtZero: true }
+          x: { beginAtZero: true },
+          y: { ticks: { autoSkip: false } }
         }
       }
     });
