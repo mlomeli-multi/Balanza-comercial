@@ -1133,10 +1133,12 @@ function _renderTabla(data, contenedor) {
   let html;
 
   if (modoOps) {
+    const rankingCompras = new Map(_rankingTopProveedores(combinado).map(r => [r.nombre, r.rankingProveedor]));
     const monedasHdr = monedasCompra.map(m => `<th class="num" data-k="compras_${m}">Compras ${m}</th>`).join('');
     html = `<table><thead><tr>
       <th data-k="nombre">Empresa</th>
       <th data-k="tipo">Tipo</th>
+      <th class="num">Rank compra</th>
       <th class="num" data-k="venta_usd">Venta USD</th>
       <th class="num" data-k="utilidad_usd">Utilidad USD</th>
       <th class="num" data-k="margen_pct">% Margen</th>
@@ -1151,6 +1153,7 @@ function _renderTabla(data, contenedor) {
       html += `<tr class="${negClass}">`;
       html += `<td>${escapeHtml(r.nombre)}</td>`;
       html += `<td><span class="badge ${tipoBadge}">${tipoBadge}</span></td>`;
+      html += `<td class="num">${rankingCompras.get(r.nombre) || '—'}</td>`;
       html += `<td class="num">${r.venta_usd?fmtMoneda(r.venta_usd,'USD'):'—'}</td>`;
       html += `<td class="num ${(r.utilidad_usd||0)<0?'neg':((r.utilidad_usd||0)>0?'pos':'')}">${r.venta_usd?fmtMoneda(r.utilidad_usd,'USD'):'—'}</td>`;
       html += `<td class="num">${margen}</td>`;
@@ -1213,11 +1216,20 @@ function _ordenarTopProveedores(data) {
   });
 }
 
+function _rankingTopClientes(data) {
+  return _ordenarTopClientes(data.filter(r => r.tieneVenta)).map((r, idx) => ({...r, rankingCliente: idx + 1}));
+}
+
+function _rankingTopProveedores(data) {
+  return _ordenarTopProveedores(data.filter(r => r.tieneCompra)).map((r, idx) => ({...r, rankingProveedor: idx + 1}));
+}
+
 // Tabla reducida Top Clientes (solo registros con venta)
 function _renderTopClientes(data, contenedor) {
-  const clientes = _ordenarTopClientes(data.filter(r => r.tieneVenta)).slice(0, TOP_N);
+  const clientes = _rankingTopClientes(data).slice(0, TOP_N);
   if (!clientes.length) { contenedor.innerHTML = '<div class="empty">Sin ventas en el año</div>'; return; }
   let html = `<table><thead><tr>
+    <th class="num">#</th>
     <th data-top-clientes="nombre">Empresa</th>
     <th class="num" data-top-clientes="venta_usd">Venta USD</th>
     <th class="num" data-top-clientes="utilidad_usd">Utilidad USD</th>
@@ -1228,6 +1240,7 @@ function _renderTopClientes(data, contenedor) {
     const negClass = (r.utilidad_usd||0) < 0 ? 'utilidad-neg' : '';
     const margen = r.margen_pct === null ? '—' : r.margen_pct.toFixed(1)+'%';
     html += `<tr class="${negClass}">`;
+    html += `<td class="num">${r.rankingCliente}</td>`;
     html += `<td>${escapeHtml(r.nombre)}</td>`;
     html += `<td class="num">${fmtMoneda(r.venta_usd,'USD')}</td>`;
     html += `<td class="num ${(r.utilidad_usd||0)<0?'neg':'pos'}">${fmtMoneda(r.utilidad_usd,'USD')}</td>`;
@@ -1250,16 +1263,18 @@ function _renderTopClientes(data, contenedor) {
 
 // Tabla reducida Top Proveedores (solo registros con compras)
 function _renderTopProveedores(data, contenedor) {
-  const proveedores = _ordenarTopProveedores(data.filter(r => r.tieneCompra)).slice(0, TOP_N);
+  const proveedores = _rankingTopProveedores(data).slice(0, TOP_N);
   if (!proveedores.length) { contenedor.innerHTML = '<div class="empty">Sin compras en el año</div>'; return; }
   const monedasHdr = monedasCompra.map(m => `<th class="num" data-top-proveedores="compras_${m}">Compras ${m}</th>`).join('');
   let html = `<table><thead><tr>
+    <th class="num">#</th>
     <th data-top-proveedores="nombre">Empresa</th>
     ${monedasHdr}
     <th class="num" data-top-proveedores="embarques_compra">Emb.</th>
   </tr></thead><tbody>`;
   for (const r of proveedores) {
     html += '<tr>';
+    html += `<td class="num">${r.rankingProveedor}</td>`;
     html += `<td>${escapeHtml(r.nombre)}</td>`;
     for (const m of monedasCompra) {
       const v = (r.compras||{})[m] || 0;
@@ -1297,7 +1312,7 @@ function pintarTabla() {
     const nProv = dataFiltrada.filter(r => r.tieneCompra).length;
     const monedaTopProv = _monedaPrincipalTopProveedores();
     tituloCli.innerHTML = `Top ${TOP_N} Clientes <span style="font-size:12px;color:#6b7280;font-weight:400">(por venta USD${nClientes>TOP_N?` — de ${nClientes}`:''})</span>`;
-    tituloProv.innerHTML = `Top ${TOP_N} Proveedores <span style="font-size:12px;color:#6b7280;font-weight:400">(por compras ${monedaTopProv}${nProv>TOP_N?` — de ${nProv}`:''})</span>`;
+    tituloProv.innerHTML = `Top ${TOP_N} Proveedores <span style="font-size:12px;color:#6b7280;font-weight:400">(por compras ${monedaTopProv}${nProv>TOP_N?` — de ${nProv}`:''}; revisa \"Rank compra\" abajo para el lugar exacto)</span>`;
     _renderTopClientes(dataOrdenada, wrapClientes);
     _renderTopProveedores(dataOrdenada, wrapProveedores);
     // Tabla completa abajo con todas las columnas y ordenamiento dinámico
