@@ -1147,12 +1147,10 @@ function _renderTabla(data, contenedor) {
   let html;
 
   if (modoOps) {
-    const rankingCompras = new Map(_rankingTopProveedores(combinado).map(r => [r.nombre, r.rankingProveedor]));
     const monedasHdr = monedasCompra.map(m => `<th class="num" data-k="compras_${m}">Compras ${m}</th>`).join('');
     html = `<table><thead><tr>
       <th data-k="nombre">Empresa</th>
       <th data-k="tipo">Tipo</th>
-      <th class="num">Rank compra</th>
       <th class="num" data-k="venta_usd">Venta USD</th>
       <th class="num" data-k="utilidad_usd">Utilidad USD</th>
       <th class="num" data-k="margen_pct">% Margen</th>
@@ -1167,7 +1165,6 @@ function _renderTabla(data, contenedor) {
       html += `<tr class="${negClass}">`;
       html += `<td>${escapeHtml(r.nombre)}</td>`;
       html += `<td><span class="badge ${tipoBadge}">${tipoBadge}</span></td>`;
-      html += `<td class="num">${rankingCompras.get(r.nombre) || '—'}</td>`;
       html += `<td class="num">${r.venta_usd?fmtMoneda(r.venta_usd,'USD'):'—'}</td>`;
       html += `<td class="num ${(r.utilidad_usd||0)<0?'neg':((r.utilidad_usd||0)>0?'pos':'')}">${r.venta_usd?fmtMoneda(r.utilidad_usd,'USD'):'—'}</td>`;
       html += `<td class="num">${margen}</td>`;
@@ -1326,7 +1323,7 @@ function pintarTabla() {
     const nProv = dataFiltrada.filter(r => r.tieneCompra).length;
     const monedaTopProv = _monedaPrincipalTopProveedores();
     tituloCli.innerHTML = `Top ${TOP_N} Clientes <span style="font-size:12px;color:#6b7280;font-weight:400">(por venta USD${nClientes>TOP_N?` — de ${nClientes}`:''})</span>`;
-    tituloProv.innerHTML = `Top ${TOP_N} Proveedores <span style="font-size:12px;color:#6b7280;font-weight:400">(por compras ${monedaTopProv}${nProv>TOP_N?` — de ${nProv}`:''}; revisa \"Rank compra\" abajo para el lugar exacto)</span>`;
+    tituloProv.innerHTML = `Top ${TOP_N} Proveedores <span style="font-size:12px;color:#6b7280;font-weight:400">(por compras ${monedaTopProv}${nProv>TOP_N?` — de ${nProv}`:''})</span>`;
     _renderTopClientes(dataOrdenada, wrapClientes);
     _renderTopProveedores(dataOrdenada, wrapProveedores);
     // Tabla completa abajo con todas las columnas y ordenamiento dinámico
