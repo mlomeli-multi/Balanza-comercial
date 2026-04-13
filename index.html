@@ -9,14 +9,28 @@
 <style>
   * { box-sizing: border-box; }
   body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; background: #f4f6f9; color: #1f2937; }
-  header { background: linear-gradient(135deg,#1e3a8a,#2563eb); color: #fff; padding: 18px 24px 24px; }
-  .header-tools { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:12px; margin-bottom:18px; }
-  .header-upload { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.24); border-radius: 12px; padding: 12px; backdrop-filter: blur(4px); }
-  .header-upload h2 { margin: 0 0 6px; font-size: 13px; font-weight: 700; }
-  .header-upload input { width: 100%; font-size: 12px; color: #fff; }
-  .header-upload .info { font-size: 11px; color: rgba(255,255,255,.82); margin-top: 6px; min-height: 28px; }
-  .header-copy h1 { margin: 0 0 4px; font-size: 22px; }
-  .header-copy p { margin: 0; opacity: .85; font-size: 14px; }
+  header { background:
+      radial-gradient(circle at top left, rgba(255,255,255,.24), transparent 30%),
+      linear-gradient(135deg,#16357a 0%,#2155c8 55%,#2f7cf6 100%);
+    color: #fff; padding: 22px 24px 26px; box-shadow: inset 0 -1px 0 rgba(255,255,255,.12); }
+  .header-shell { max-width: 1400px; margin: 0 auto; display: grid; gap: 18px; }
+  .header-copy { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; }
+  .header-copy h1 { margin: 0 0 6px; font-size: 28px; line-height: 1.05; letter-spacing: -.03em; }
+  .header-copy p { margin: 0; max-width: 760px; color: rgba(255,255,255,.82); font-size: 14px; }
+  .header-chip { display:inline-flex; align-items:center; gap:8px; padding: 6px 12px; border-radius:999px; background: rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.18); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color: rgba(255,255,255,.92); }
+  .header-tools { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:14px; }
+  .header-upload { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); border-radius: 18px; padding: 14px; backdrop-filter: blur(10px); box-shadow: 0 16px 30px rgba(9,30,66,.16); }
+  .header-upload-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+  .header-upload h2 { margin: 0 0 3px; font-size: 14px; font-weight: 700; color:#fff; }
+  .header-upload p { margin: 0; font-size: 11px; color: rgba(255,255,255,.72); }
+  .header-upload input { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
+  .upload-trigger { display:inline-flex; align-items:center; justify-content:center; white-space:nowrap; min-width:108px; padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.28); background: rgba(255,255,255,.18); color:#fff; font-size:12px; font-weight:700; cursor:pointer; transition: transform .18s ease, background .18s ease, border-color .18s ease; }
+  .upload-trigger:hover { transform: translateY(-1px); background: rgba(255,255,255,.26); border-color: rgba(255,255,255,.4); }
+  .header-upload .info { min-height: 76px; padding: 12px 14px; border-radius: 14px; background: rgba(8,24,58,.24); border: 1px solid rgba(255,255,255,.14); color: rgba(255,255,255,.92); font-size: 12px; line-height: 1.35; }
+  .info-label { display:block; margin-bottom:8px; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color: rgba(255,255,255,.56); }
+  .info-main { display:block; font-size:18px; font-weight:800; line-height:1.05; color:#fff; }
+  .info-sub { display:block; margin-top:4px; color: rgba(255,255,255,.78); }
+  .info-meta { display:block; margin-top:8px; color: rgba(255,255,255,.62); font-size:11px; }
   main { padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
   .grid { display: grid; gap: 16px; }
   .cards { grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); margin-bottom: 24px; }
@@ -61,54 +75,84 @@
   button:hover { background: #1d4ed8; }
   .empty { text-align: center; padding: 40px; color: #9ca3af; }
   .help { background: #eff6ff; border-left: 4px solid #2563eb; padding: 12px 16px; border-radius: 4px; font-size: 13px; margin-bottom: 16px; }
-  @media (max-width: 1100px) { #topsGrid, .header-tools { grid-template-columns: 1fr 1fr !important; } }
-  @media (max-width: 800px) { .uploads, .charts, .header-tools { grid-template-columns: 1fr; } main { padding: 16px; } header { padding: 16px; } }
+  @media (max-width: 1100px) { #topsGrid, .header-tools { grid-template-columns: 1fr 1fr !important; } .header-copy { grid-template-columns: 1fr; align-items:flex-start; flex-direction:column; } }
+  @media (max-width: 800px) { .uploads, .charts, .header-tools { grid-template-columns: 1fr; } main { padding: 16px; } header { padding: 16px; } .header-upload-head { align-items:flex-start; flex-direction:column; } .upload-trigger { width:100%; } .header-copy h1 { font-size:24px; } }
 </style>
 </head>
 <body>
 <header>
-  <div class="header-tools">
-    <div class="header-upload">
-      <h2>Catálogo de Clientes</h2>
-      <input type="file" id="fileClientes" accept=".xlsx,.xls,.csv">
-      <div class="info" id="infoClientes">Sin archivo</div>
+  <div class="header-shell">
+    <div class="header-copy">
+      <div>
+        <span class="header-chip">Dashboard de balanza</span>
+        <h1>Balanza Comercial</h1>
+        <p>Compara tus clientes contra tus proveedores e identifica oportunidades ganar/ganar.</p>
+      </div>
+      <div class="header-chip">Carga local y catalogos del repo</div>
     </div>
-    <div class="header-upload">
-      <h2>Catálogo de Proveedores</h2>
-      <input type="file" id="fileProveedores" accept=".xlsx,.xls,.csv">
-      <div class="info" id="infoProveedores">Sin archivo</div>
+    <div class="header-tools">
+      <div class="header-upload">
+        <div class="header-upload-head">
+          <div>
+            <h2>Catalogo de Clientes</h2>
+            <p>Base de clientes para matching</p>
+          </div>
+          <label class="upload-trigger" for="fileClientes">Subir archivo</label>
+        </div>
+        <input type="file" id="fileClientes" accept=".xlsx,.xls,.csv">
+        <div class="info" id="infoClientes"><span class="info-label">Resumen</span><span class="info-main">Sin archivo</span><span class="info-sub">Carga un catalogo para empezar.</span></div>
+      </div>
+      <div class="header-upload">
+        <div class="header-upload-head">
+          <div>
+            <h2>Catalogo de Proveedores</h2>
+            <p>Base maestra de proveedores</p>
+          </div>
+          <label class="upload-trigger" for="fileProveedores">Subir archivo</label>
+        </div>
+        <input type="file" id="fileProveedores" accept=".xlsx,.xls,.csv">
+        <div class="info" id="infoProveedores"><span class="info-label">Resumen</span><span class="info-main">Sin archivo</span><span class="info-sub">Carga un catalogo para empezar.</span></div>
+      </div>
+      <div class="header-upload">
+        <div class="header-upload-head">
+          <div>
+            <h2>Excel de Ventas</h2>
+            <p>Ventas filtradas por ano actual</p>
+          </div>
+          <label class="upload-trigger" for="fileVentas">Subir archivo</label>
+        </div>
+        <input type="file" id="fileVentas" accept=".xlsx,.xls,.csv">
+        <div class="info" id="infoVentas"><span class="info-label">Resumen</span><span class="info-main">Sin archivo</span><span class="info-sub">Cuando cargues ventas veras clientes, embarques y utilidad.</span></div>
+      </div>
+      <div class="header-upload">
+        <div class="header-upload-head">
+          <div>
+            <h2>Excel de Compras</h2>
+            <p>Compras activas segun filtros</p>
+          </div>
+          <label class="upload-trigger" for="fileCompras">Subir archivo</label>
+        </div>
+        <input type="file" id="fileCompras" accept=".xlsx,.xls,.csv">
+        <div class="info" id="infoCompras"><span class="info-label">Resumen</span><span class="info-main">Sin archivo</span><span class="info-sub">Cuando cargues compras veras proveedores, embarques y monedas.</span></div>
+      </div>
     </div>
-    <div class="header-upload">
-      <h2>Excel de Ventas</h2>
-      <input type="file" id="fileVentas" accept=".xlsx,.xls,.csv">
-      <div class="info" id="infoVentas">Sin archivo</div>
-    </div>
-    <div class="header-upload">
-      <h2>Excel de Compras</h2>
-      <input type="file" id="fileCompras" accept=".xlsx,.xls,.csv">
-      <div class="info" id="infoCompras">Sin archivo</div>
-    </div>
-  </div>
-  <div class="header-copy">
-    <h1>Balanza Comercial</h1>
-    <p>Compara tus clientes contra tus proveedores e identifica oportunidades ganar/ganar</p>
   </div>
 </header>
 <main>
-  <div id="estadoCarga" class="help" style="display:none">Cargando…</div>
+  <div id="estadoCarga" class="help" style="display:none">CargandoÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</div>
 
 
   <div class="grid cards" id="kpisWrap">
-    <!-- Se llena dinámicamente desde JS -->
+    <!-- Se llena dinÃƒÆ’Ã‚Â¡micamente desde JS -->
   </div>
 
   <div class="charts" id="chartsWrap" style="display:none">
-    <!-- Las gráficas se construyen en el Commit C -->
+    <!-- Las grÃƒÆ’Ã‚Â¡ficas se construyen en el Commit C -->
   </div>
 
   <div class="panel" style="margin-top:24px">
     <h2>Oportunidades Ganar/Ganar (relaciones bilaterales)</h2>
-    <p style="font-size:13px;color:#6b7280;margin:0 0 12px">Empresas que aparecen como clientes <b>y</b> proveedores. Una balanza desbalanceada es una oportunidad de negociación.</p>
+    <p style="font-size:13px;color:#6b7280;margin:0 0 12px">Empresas que aparecen como clientes <b>y</b> proveedores. Una balanza desbalanceada es una oportunidad de negociaciÃƒÆ’Ã‚Â³n.</p>
     <div id="bilateralWrap"><div class="empty">Sube ambos archivos para ver oportunidades</div></div>
   </div>
 
@@ -154,53 +198,53 @@ let datosProveedores = [];
 let combinado = [];
 let chartC = null, chartP = null, chartPieVenta = null;
 
-// Datos de operación (ventas / compras procesadas desde Excel)
+// Datos de operaciÃƒÆ’Ã‚Â³n (ventas / compras procesadas desde Excel)
 let opsVentas = null;   // {actualizado, archivo, total_usd, utilidad_usd, registros:{...}, descartados:{...}}
 let opsCompras = null;  // {actualizado, archivo, monedas:[], registros:{...}, descartados:{...}}
 const LS_KEY = 'balanza_ops_v1';
 const ANIO_ACTUAL = new Date().getFullYear();
 
-// === Clasificación de embarques por prefijo ===
+// === ClasificaciÃƒÆ’Ã‚Â³n de embarques por prefijo ===
 // Fuente: tabla proporcionada por el usuario (AIR/SEA/OTR/PROYECTO)
 const CLASIFICACION_EMBARQUE = {
   // AIR
-  IA:  {cat:'AIR', sub:'Importación Aérea'},
-  EA:  {cat:'AIR', sub:'Exportación Aérea'},
-  IH:  {cat:'AIR', sub:'Importación Handcarry'},
-  EH:  {cat:'AIR', sub:'Exportación Handcarry'},
-  DH:  {cat:'AIR', sub:'Doméstico Handcarry'},
-  DA:  {cat:'AIR', sub:'Doméstico Aéreo'},
-  IC:  {cat:'AIR', sub:'Importación Charter'},
-  EC:  {cat:'AIR', sub:'Exportación Charter'},
-  DC:  {cat:'AIR', sub:'Doméstico Charter'},
-  AA:  {cat:'AIR', sub:'Arrastre Aéreo'},
+  IA:  {cat:'AIR', sub:'ImportaciÃƒÆ’Ã‚Â³n AÃƒÆ’Ã‚Â©rea'},
+  EA:  {cat:'AIR', sub:'ExportaciÃƒÆ’Ã‚Â³n AÃƒÆ’Ã‚Â©rea'},
+  IH:  {cat:'AIR', sub:'ImportaciÃƒÆ’Ã‚Â³n Handcarry'},
+  EH:  {cat:'AIR', sub:'ExportaciÃƒÆ’Ã‚Â³n Handcarry'},
+  DH:  {cat:'AIR', sub:'DomÃƒÆ’Ã‚Â©stico Handcarry'},
+  DA:  {cat:'AIR', sub:'DomÃƒÆ’Ã‚Â©stico AÃƒÆ’Ã‚Â©reo'},
+  IC:  {cat:'AIR', sub:'ImportaciÃƒÆ’Ã‚Â³n Charter'},
+  EC:  {cat:'AIR', sub:'ExportaciÃƒÆ’Ã‚Â³n Charter'},
+  DC:  {cat:'AIR', sub:'DomÃƒÆ’Ã‚Â©stico Charter'},
+  AA:  {cat:'AIR', sub:'Arrastre AÃƒÆ’Ã‚Â©reo'},
   // SEA
-  EM:  {cat:'SEA', sub:'Exportación Marítima'},
-  IM:  {cat:'SEA', sub:'Importación Marítima'},
-  DM:  {cat:'SEA', sub:'Doméstico Marítimo'},
-  AM:  {cat:'SEA', sub:'Arrastre Marítimo'},
+  EM:  {cat:'SEA', sub:'ExportaciÃƒÆ’Ã‚Â³n MarÃƒÆ’Ã‚Â­tima'},
+  IM:  {cat:'SEA', sub:'ImportaciÃƒÆ’Ã‚Â³n MarÃƒÆ’Ã‚Â­tima'},
+  DM:  {cat:'SEA', sub:'DomÃƒÆ’Ã‚Â©stico MarÃƒÆ’Ã‚Â­timo'},
+  AM:  {cat:'SEA', sub:'Arrastre MarÃƒÆ’Ã‚Â­timo'},
   // OTR
-  DT:  {cat:'OTR', sub:'Doméstico Terrestre'},
-  ET:  {cat:'OTR', sub:'Exportación Terrestre'},
-  IT:  {cat:'OTR', sub:'Importación Terrestre'},
+  DT:  {cat:'OTR', sub:'DomÃƒÆ’Ã‚Â©stico Terrestre'},
+  ET:  {cat:'OTR', sub:'ExportaciÃƒÆ’Ã‚Â³n Terrestre'},
+  IT:  {cat:'OTR', sub:'ImportaciÃƒÆ’Ã‚Â³n Terrestre'},
   WH:  {cat:'OTR', sub:'Wharehouse'},
   // PROYECTO
-  DP:  {cat:'PROYECTO', sub:'Doméstico Proyecto'},
-  EP:  {cat:'PROYECTO', sub:'Exportación Doméstica'},
-  IP:  {cat:'PROYECTO', sub:'Importación Doméstico'},
-  DPA: {cat:'PROYECTO', sub:'Doméstico Proyecto Aéreo'},
-  EPA: {cat:'PROYECTO', sub:'Exportación Proyecto Aéreo'},
-  IPA: {cat:'PROYECTO', sub:'Importación Proyecto Aéreo'},
-  APM: {cat:'PROYECTO', sub:'Arrastre Proyecto Marítimo'},
-  EPM: {cat:'PROYECTO', sub:'Exportación Proyecto Marítimo'},
-  IPM: {cat:'PROYECTO', sub:'Importación Proyecto Marítimo'},
-  DPT: {cat:'PROYECTO', sub:'Doméstico Proyecto Terrestre'},
-  EPT: {cat:'PROYECTO', sub:'Exportación Proyecto Terrestre'},
-  IPT: {cat:'PROYECTO', sub:'Importación Proyecto Terrestre'},
+  DP:  {cat:'PROYECTO', sub:'DomÃƒÆ’Ã‚Â©stico Proyecto'},
+  EP:  {cat:'PROYECTO', sub:'ExportaciÃƒÆ’Ã‚Â³n DomÃƒÆ’Ã‚Â©stica'},
+  IP:  {cat:'PROYECTO', sub:'ImportaciÃƒÆ’Ã‚Â³n DomÃƒÆ’Ã‚Â©stico'},
+  DPA: {cat:'PROYECTO', sub:'DomÃƒÆ’Ã‚Â©stico Proyecto AÃƒÆ’Ã‚Â©reo'},
+  EPA: {cat:'PROYECTO', sub:'ExportaciÃƒÆ’Ã‚Â³n Proyecto AÃƒÆ’Ã‚Â©reo'},
+  IPA: {cat:'PROYECTO', sub:'ImportaciÃƒÆ’Ã‚Â³n Proyecto AÃƒÆ’Ã‚Â©reo'},
+  APM: {cat:'PROYECTO', sub:'Arrastre Proyecto MarÃƒÆ’Ã‚Â­timo'},
+  EPM: {cat:'PROYECTO', sub:'ExportaciÃƒÆ’Ã‚Â³n Proyecto MarÃƒÆ’Ã‚Â­timo'},
+  IPM: {cat:'PROYECTO', sub:'ImportaciÃƒÆ’Ã‚Â³n Proyecto MarÃƒÆ’Ã‚Â­timo'},
+  DPT: {cat:'PROYECTO', sub:'DomÃƒÆ’Ã‚Â©stico Proyecto Terrestre'},
+  EPT: {cat:'PROYECTO', sub:'ExportaciÃƒÆ’Ã‚Â³n Proyecto Terrestre'},
+  IPT: {cat:'PROYECTO', sub:'ImportaciÃƒÆ’Ã‚Â³n Proyecto Terrestre'},
 };
 
-// Parser del embarque: extrae prefijo, año y mes
-// Ej. "DT-202604-1389" → {prefijo:"DT", anio:2026, mes:4, cat:"OTR", sub:"Doméstico Terrestre"}
+// Parser del embarque: extrae prefijo, aÃƒÆ’Ã‚Â±o y mes
+// Ej. "DT-202604-1389" ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ {prefijo:"DT", anio:2026, mes:4, cat:"OTR", sub:"DomÃƒÆ’Ã‚Â©stico Terrestre"}
 function parseEmbarque(s) {
   if (!s) return null;
   const m = String(s).trim().toUpperCase().match(/^([A-Z]+)-(\d{4})(\d{2})-/);
@@ -230,9 +274,9 @@ function normEstatus(s) {
 const fmt = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n||0);
 const norm = s => (s||'').toString().trim().toUpperCase().replace(/[.,]/g,'').replace(/\s+/g,' ');
 
-// Normalización agresiva: quita acentos, paréntesis, puntuación y sufijos de empresa
+// NormalizaciÃƒÆ’Ã‚Â³n agresiva: quita acentos, parÃƒÆ’Ã‚Â©ntesis, puntuaciÃƒÆ’Ã‚Â³n y sufijos de empresa
 const STOPWORDS = new Set(['LTD','LTDA','LIMITED','INC','GMBH','SA','SAS','SRL','LLC','CO','CORP','COMPANY','PVT','SPA','BV','AG','KG','AB','AS','OY','SL','DE','CV','SP','ZRT','KFT','FZC','FZCO','FZE','NV','S','R','L','Z','O','THE','AND','OF','VE','TIC','TICARET','LDA','SAN','SRO','RL']);
-// Aliases para corregir typos / variantes conocidas (token -> token canónico)
+// Aliases para corregir typos / variantes conocidas (token -> token canÃƒÆ’Ã‚Â³nico)
 const TOKEN_ALIASES = {'TIMECRTI':'TIMECRITI'};
 const NORMALIZED_ALIASES = {
   'TIME MATTERS AMERICAS': 'TIME MATTERS',
@@ -331,13 +375,13 @@ function procesar(rows) {
 // ==== PROCESAMIENTO DE EXCEL DE VENTAS ====
 // Columnas (0-based): C=2 Embarque, I=8 Cliente, J=9 Ingreso, L=11 Neto Final
 function procesarVentas(matriz) {
-  // matriz es un arreglo de arreglos (row → [col A, col B, ...])
+  // matriz es un arreglo de arreglos (row ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ [col A, col B, ...])
   // Fila 0 es encabezado, los datos empiezan en la fila 1
   const porCliente = new Map();
   let procesadas = 0;
   const descartadas = {sinEmbarque:0, anioDistinto:0, sinCatalogo:0, sinCliente:0};
 
-  // Construir índice normalizado del catálogo de clientes
+  // Construir ÃƒÆ’Ã‚Â­ndice normalizado del catÃƒÆ’Ã‚Â¡logo de clientes
   const catIndex = new Map();
   const catalogoPreparado = [];
   for (const c of datosClientes) {
@@ -414,7 +458,7 @@ function procesarCompras(matriz) {
   const descartadas = {sinEmbarque:0, anioDistinto:0, estatusEmb:0, estatusProv:0, sinCatalogo:0, sinProveedor:0};
   const monedasSet = new Set();
 
-  // Índice del catálogo de proveedores
+  // ÃƒÆ’Ã‚Ândice del catÃƒÆ’Ã‚Â¡logo de proveedores
   const catIndex = new Map();
   const catalogoPreparado = [];
   for (const p of datosProveedores) {
@@ -450,7 +494,7 @@ function procesarCompras(matriz) {
         nombre: nombreCatalogo,
         compras: {},     // por moneda
         embarques: 0,
-        porCategoria: {}, // cat → {moneda: monto, count}
+        porCategoria: {}, // cat ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ {moneda: monto, count}
         porSubcategoria: {}
       });
     }
@@ -570,33 +614,33 @@ function leerExcelComoMatriz(file, cb) {
   reader.readAsArrayBuffer(file);
 }
 
-// ==== RENDER DE INFO DE OPERACIÓN (resumen en los uploads) ====
+// ==== RENDER DE INFO DE OPERACIÃƒÆ’Ã¢â‚¬Å“N (resumen en los uploads) ====
 function fmtNum(n) { return new Intl.NumberFormat('es-MX',{maximumFractionDigits:0}).format(n||0); }
 function fmtUSD(n) { return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n||0); }
 
 function renderInfoVentas() {
   const info = document.getElementById('infoVentas');
-  if (!opsVentas) { info.textContent = 'Sin archivo'; return; }
+  if (!opsVentas) { info.innerHTML = '<span class="info-label">Resumen</span><span class="info-main">Sin archivo</span><span class="info-sub">Cuando cargues ventas veras clientes, embarques y utilidad.</span>'; return; }
   const nClientes = Object.keys(opsVentas.registros||{}).length;
   const d = opsVentas.descartadas || {};
   const descTotal = (d.sinEmbarque||0)+(d.anioDistinto||0)+(d.sinCatalogo||0)+(d.sinCliente||0);
   const fecha = new Date(opsVentas.actualizado).toLocaleString('es-MX');
-  info.innerHTML = `<b>${nClientes}</b> clientes · <b>${fmtNum(opsVentas.procesadas)}</b> embarques · <b>${fmtUSD(opsVentas.total_usd)}</b> venta · <b>${fmtUSD(opsVentas.utilidad_usd)}</b> utilidad<br><span style="color:#6b7280">Descartadas: ${descTotal} (sin catálogo: ${d.sinCatalogo||0}, otro año: ${d.anioDistinto||0}, sin embarque: ${d.sinEmbarque||0}) · ${fecha}</span>`;
+  info.innerHTML = `<span class="info-label">Resumen</span><span class="info-main">${fmtUSD(opsVentas.total_usd)}</span><span class="info-sub">${nClientes} clientes Ã‚Â· ${fmtNum(opsVentas.procesadas)} embarques Ã‚Â· utilidad ${fmtUSD(opsVentas.utilidad_usd)}</span><span class="info-meta">${descTotal} descartadas Ã‚Â· actualizado ${fecha}</span>`;
 }
 
 function renderInfoCompras() {
   const info = document.getElementById('infoCompras');
-  if (!opsCompras) { info.textContent = 'Sin archivo'; return; }
+  if (!opsCompras) { info.innerHTML = '<span class="info-label">Resumen</span><span class="info-main">Sin archivo</span><span class="info-sub">Cuando cargues compras veras proveedores, embarques y monedas.</span>'; return; }
   const nProv = Object.keys(opsCompras.registros||{}).length;
   const d = opsCompras.descartadas || {};
   const descTotal = Object.values(d).reduce((s,x)=>s+(x||0),0);
   const fecha = new Date(opsCompras.actualizado).toLocaleString('es-MX');
   const totalesStr = Object.entries(opsCompras.totalesPorMoneda||{})
-    .map(([m,v]) => `<b>${fmtNum(v)}</b> ${m}`).join(' · ') || '—';
-  info.innerHTML = `<b>${nProv}</b> proveedores · <b>${fmtNum(opsCompras.procesadas)}</b> embarques · ${totalesStr}<br><span style="color:#6b7280">Descartadas: ${descTotal} (sin catálogo: ${d.sinCatalogo||0}, estatus emb: ${d.estatusEmb||0}, estatus prov: ${d.estatusProv||0}, otro año: ${d.anioDistinto||0}) · ${fecha}</span>`;
+    .map(([m,v]) => `${fmtNum(v)} ${m}`).join(' Ã‚Â· ') || 'Sin montos';
+  info.innerHTML = `<span class="info-label">Resumen</span><span class="info-main">${nProv} proveedores</span><span class="info-sub">${fmtNum(opsCompras.procesadas)} embarques Ã‚Â· ${totalesStr}</span><span class="info-meta">${descTotal} descartadas Ã‚Â· actualizado ${fecha}</span>`;
 }
 
-// ==== EVENT LISTENERS DE LOS UPLOADS DE OPERACIÓN ====
+// ==== EVENT LISTENERS DE LOS UPLOADS DE OPERACIÃƒÆ’Ã¢â‚¬Å“N ====
 document.getElementById('fileVentas').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
   refrescarCatalogos().then(() => {
@@ -622,7 +666,7 @@ document.getElementById('fileCompras').addEventListener('change', e => {
   });
 });
 document.getElementById('btnLimpiarOps').addEventListener('click', () => {
-  if (!confirm('¿Borrar los datos de ventas y compras guardados en este navegador?')) return;
+  if (!confirm('Ãƒâ€šÃ‚Â¿Borrar los datos de ventas y compras guardados en este navegador?')) return;
   aplicarOpsDesdePayload({ventas:null, compras:null});
 });
 document.getElementById('btnDescargarBackup').addEventListener('click', () => {
@@ -659,7 +703,7 @@ document.getElementById('fileClientes').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
   leerArchivo(f, rows => {
     datosClientes = procesar(rows);
-    document.getElementById('infoClientes').textContent = `${f.name} — ${datosClientes.length} clientes`;
+    document.getElementById('infoClientes').innerHTML = `<span class="info-label">Resumen</span><span class="info-main">${datosClientes.length} clientes</span><span class="info-sub">Archivo: ${f.name}</span>`;
     actualizar();
   });
 });
@@ -667,7 +711,7 @@ document.getElementById('fileProveedores').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
   leerArchivo(f, rows => {
     datosProveedores = procesar(rows);
-    document.getElementById('infoProveedores').textContent = `${f.name} — ${datosProveedores.length} proveedores`;
+    document.getElementById('infoProveedores').innerHTML = `<span class="info-label">Resumen</span><span class="info-main">${datosProveedores.length} proveedores</span><span class="info-sub">Archivo: ${f.name}</span>`;
     actualizar();
   });
 });
@@ -697,21 +741,19 @@ async function refrescarCatalogos() {
   if (c && c.registros.length) {
     datosClientes = c.registros.map(r => ({nombre: r.nombre, monto: Number(r.monto)||0}))
       .sort((a,b)=>a.nombre.localeCompare(b.nombre));
-    document.getElementById('infoClientes').textContent =
-      `${datosClientes.length} clientes en catálogo` + (c.actualizado ? ` · act. ${c.actualizado}` : '');
+    document.getElementById('infoClientes').innerHTML = `<span class="info-label">Resumen</span><span class="info-main">${datosClientes.length} clientes</span><span class="info-sub">Catalogo cargado desde el repo</span><span class="info-meta">${c.actualizado ? 'Actualizado ' + c.actualizado : ''}</span>`;
   }
   if (p && p.registros.length) {
     datosProveedores = p.registros.map(r => ({nombre: r.nombre, monto: Number(r.monto)||0}))
       .sort((a,b)=>a.nombre.localeCompare(b.nombre));
-    document.getElementById('infoProveedores').textContent =
-      `${datosProveedores.length} proveedores en catálogo` + (p.actualizado ? ` · act. ${p.actualizado}` : '');
+    document.getElementById('infoProveedores').innerHTML = `<span class="info-label">Resumen</span><span class="info-main">${datosProveedores.length} proveedores</span><span class="info-sub">Catalogo cargado desde el repo</span><span class="info-meta">${p.actualizado ? 'Actualizado ' + p.actualizado : ''}</span>`;
   }
 }
 
 inicializar();
 
-let modoOps = false;          // hay datos de operación cargados
-let monedasCompra = [];       // ['USD','EUR',...] dinámico
+let modoOps = false;          // hay datos de operaciÃƒÆ’Ã‚Â³n cargados
+let monedasCompra = [];       // ['USD','EUR',...] dinÃƒÆ’Ã‚Â¡mico
 
 function fmtMoneda(n, mon) {
   if (mon === 'USD') return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n||0);
@@ -724,10 +766,10 @@ function actualizar() {
   modoOps = !!(opsVentas || opsCompras);
   monedasCompra = opsCompras ? (opsCompras.monedas || []) : [];
 
-  // Construir combinado: catálogo de clientes/proveedores + datos de operación si existen
+  // Construir combinado: catÃƒÆ’Ã‚Â¡logo de clientes/proveedores + datos de operaciÃƒÆ’Ã‚Â³n si existen
   const map = new Map();
 
-  // 1. Sembrar con catálogo
+  // 1. Sembrar con catÃƒÆ’Ã‚Â¡logo
   for (const c of datosClientes) {
     const k = normCore(c.nombre);
     if (!k) continue;
@@ -804,16 +846,16 @@ function pintarKpis() {
   const bilaterales = combinado.filter(r => r.tipo === 'ambos').length;
 
   if (!modoOps) {
-    html += card('Clientes', datosClientes.length, 'en catálogo');
-    html += card('Proveedores', datosProveedores.length, 'en catálogo');
+    html += card('Clientes', datosClientes.length, 'en catÃƒÆ’Ã‚Â¡logo');
+    html += card('Proveedores', datosProveedores.length, 'en catÃƒÆ’Ã‚Â¡logo');
     html += card('Bilaterales', bilaterales, 'cliente y proveedor');
-    html += card('Estado', 'Catálogo', 'sin datos de operación');
+    html += card('Estado', 'CatÃƒÆ’Ã‚Â¡logo', 'sin datos de operaciÃƒÆ’Ã‚Â³n');
   } else {
     // Venta USD
     if (opsVentas) {
       const margenPct = opsVentas.total_usd ? (opsVentas.utilidad_usd/opsVentas.total_usd*100) : 0;
       html += card('Venta ' + ANIO_ACTUAL + ' (USD)', fmtMoneda(opsVentas.total_usd, 'USD'),
-        `${opsVentas.procesadas} embarques · ${Object.keys(opsVentas.registros||{}).length} clientes`);
+        `${opsVentas.procesadas} embarques Ãƒâ€šÃ‚Â· ${Object.keys(opsVentas.registros||{}).length} clientes`);
       html += card('Utilidad ' + ANIO_ACTUAL + ' (USD)', fmtMoneda(opsVentas.utilidad_usd, 'USD'),
         `Margen ${margenPct.toFixed(1)}%`,
         opsVentas.utilidad_usd < 0 ? 'neg' : 'pos');
@@ -829,11 +871,11 @@ function pintarKpis() {
     // Balanza USD (solo si hay venta y compra USD)
     if (opsVentas && opsCompras && (opsCompras.totalesPorMoneda||{})['USD']) {
       const bal = opsVentas.total_usd - (opsCompras.totalesPorMoneda['USD']||0);
-      html += card('Balanza USD', fmtMoneda(bal,'USD'), 'venta − compras', bal>=0?'pos':'neg');
+      html += card('Balanza USD', fmtMoneda(bal,'USD'), 'venta ÃƒÂ¢Ã‹â€ Ã¢â‚¬â„¢ compras', bal>=0?'pos':'neg');
     }
-    // Bilaterales con operación
+    // Bilaterales con operaciÃƒÆ’Ã‚Â³n
     const bilOps = combinado.filter(r => r.tipo==='ambos' && (r.tieneVenta || r.tieneCompra)).length;
-    html += card('Bilaterales activos', bilOps, `${bilaterales} en catálogo`);
+    html += card('Bilaterales activos', bilOps, `${bilaterales} en catÃƒÆ’Ã‚Â¡logo`);
   }
 
   wrap.innerHTML = html;
@@ -993,13 +1035,13 @@ function _emptyChartMessage(texto) {
 
 function _renderSubcategoriasVenta(data, contenedor) {
   if (!data.length) {
-    contenedor.innerHTML = '<div class="empty">Sin subcategorías de venta para mostrar</div>';
+    contenedor.innerHTML = '<div class="empty">Sin subcategorÃƒÆ’Ã‚Â­as de venta para mostrar</div>';
     return;
   }
   let html = `<table><thead><tr>
     <th>Prefijo</th>
     <th>Servicio</th>
-    <th>Categoría</th>
+    <th>CategorÃƒÆ’Ã‚Â­a</th>
     <th class="num">Venta USD</th>
     <th class="num">Utilidad USD</th>
     <th class="num">Emb.</th>
@@ -1042,13 +1084,13 @@ function pintarBilaterales() {
       const oportunidad = _oportunidadTexto(r);
       const negClass = (r.utilidad_usd||0) < 0 ? 'utilidad-neg' : '';
       let row = `<tr class="${negClass}"><td><b>${escapeHtml(r.nombre)}</b></td>`;
-      row += `<td class="num">${r.venta_usd?fmtMoneda(r.venta_usd,'USD'):'—'}</td>`;
-      row += `<td class="num ${(r.utilidad_usd||0)<0?'neg':''}">${r.venta_usd?fmtMoneda(r.utilidad_usd,'USD'):'—'}</td>`;
+      row += `<td class="num">${r.venta_usd?fmtMoneda(r.venta_usd,'USD'):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
+      row += `<td class="num ${(r.utilidad_usd||0)<0?'neg':''}">${r.venta_usd?fmtMoneda(r.utilidad_usd,'USD'):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
       for (const m of monedasCompra) {
         const v = (r.compras||{})[m] || 0;
-        row += `<td class="num">${v?fmtMoneda(v,m):'—'}</td>`;
+        row += `<td class="num">${v?fmtMoneda(v,m):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
       }
-      row += `<td class="num ${r.balanza_usd>=0?'pos':'neg'}">${(r.venta_usd||r.compras['USD'])?fmtMoneda(r.balanza_usd,'USD'):'—'}</td>`;
+      row += `<td class="num ${r.balanza_usd>=0?'pos':'neg'}">${(r.venta_usd||r.compras['USD'])?fmtMoneda(r.balanza_usd,'USD'):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
       row += `<td style="font-size:11px">${oportunidad}</td></tr>`;
       html += row;
     }
@@ -1057,7 +1099,7 @@ function pintarBilaterales() {
   } else {
     const bil = bilCatalogo.slice();
     bil.sort((a,b)=>a.nombre.localeCompare(b.nombre));
-    let html = `<p style="font-size:13px;color:#374151;margin:0 0 12px"><b>${bil.length} coincidencias</b> entre tu catálogo de clientes y proveedores. Sube los Excel de operación para ver venta, utilidad y compras de cada uno.</p>`;
+    let html = `<p style="font-size:13px;color:#374151;margin:0 0 12px"><b>${bil.length} coincidencias</b> entre tu catÃƒÆ’Ã‚Â¡logo de clientes y proveedores. Sube los Excel de operaciÃƒÆ’Ã‚Â³n para ver venta, utilidad y compras de cada uno.</p>`;
     html += '<table><thead><tr><th>#</th><th>Nombre como cliente</th><th>Nombre como proveedor</th></tr></thead><tbody>';
     bil.forEach((r,i) => {
       html += `<tr><td>${i+1}</td><td>${escapeHtml(r.nombreCliente||'')}</td><td>${escapeHtml(r.nombreProveedor||'')}</td></tr>`;
@@ -1070,11 +1112,11 @@ function pintarBilaterales() {
 function _oportunidadTexto(r) {
   const v = r.venta_usd || 0;
   const cUsd = (r.compras||{})['USD'] || 0;
-  if (!v && !cUsd) return 'Sin actividad en el año';
-  if (v && !cUsd) return 'Solo te compran. Pídeles que te contraten también.';
-  if (!v && cUsd) return 'Solo les compras. Ofréceles servicios para reciprocidad.';
-  if (r.balanza_usd > 0) return 'Vendes más de lo que les compras. Tienes palanca.';
-  if (r.balanza_usd < 0) return 'Les compras más. Exige mayor reciprocidad.';
+  if (!v && !cUsd) return 'Sin actividad en el aÃƒÆ’Ã‚Â±o';
+  if (v && !cUsd) return 'Solo te compran. PÃƒÆ’Ã‚Â­deles que te contraten tambiÃƒÆ’Ã‚Â©n.';
+  if (!v && cUsd) return 'Solo les compras. OfrÃƒÆ’Ã‚Â©celes servicios para reciprocidad.';
+  if (r.balanza_usd > 0) return 'Vendes mÃƒÆ’Ã‚Â¡s de lo que les compras. Tienes palanca.';
+  if (r.balanza_usd < 0) return 'Les compras mÃƒÆ’Ã‚Â¡s. Exige mayor reciprocidad.';
   return 'Equilibrado.';
 }
 
@@ -1131,25 +1173,25 @@ function _renderTabla(data, contenedor) {
     for (const r of data) {
       const negClass = (r.utilidad_usd||0) < 0 ? 'utilidad-neg' : '';
       const tipoBadge = r.tipo;
-      const margen = r.margen_pct === null ? '—' : r.margen_pct.toFixed(1)+'%';
+      const margen = r.margen_pct === null ? 'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â' : r.margen_pct.toFixed(1)+'%';
       html += `<tr class="${negClass}">`;
       html += `<td>${escapeHtml(r.nombre)}</td>`;
       html += `<td><span class="badge ${tipoBadge}">${tipoBadge}</span></td>`;
-      html += `<td class="num">${r.venta_usd?fmtMoneda(r.venta_usd,'USD'):'—'}</td>`;
-      html += `<td class="num ${(r.utilidad_usd||0)<0?'neg':((r.utilidad_usd||0)>0?'pos':'')}">${r.venta_usd?fmtMoneda(r.utilidad_usd,'USD'):'—'}</td>`;
+      html += `<td class="num">${r.venta_usd?fmtMoneda(r.venta_usd,'USD'):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
+      html += `<td class="num ${(r.utilidad_usd||0)<0?'neg':((r.utilidad_usd||0)>0?'pos':'')}">${r.venta_usd?fmtMoneda(r.utilidad_usd,'USD'):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
       html += `<td class="num">${margen}</td>`;
       for (const m of monedasCompra) {
         const v = (r.compras||{})[m] || 0;
-        html += `<td class="num">${v?fmtMoneda(v,m):'—'}</td>`;
+        html += `<td class="num">${v?fmtMoneda(v,m):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
       }
-      html += `<td class="num">${r.embarques_venta||'—'}</td>`;
-      html += `<td class="num">${r.embarques_compra||'—'}</td>`;
+      html += `<td class="num">${r.embarques_venta||'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
+      html += `<td class="num">${r.embarques_compra||'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
       html += '</tr>';
     }
   } else {
     html = '<table><thead><tr><th data-k="nombre">Empresa</th><th data-k="tipo">Tipo</th><th>Como cliente</th><th>Como proveedor</th></tr></thead><tbody>';
     for (const r of data) {
-      html += `<tr><td>${escapeHtml(r.nombre)}</td><td><span class="badge ${r.tipo}">${r.tipo}</span></td><td style="font-size:12px;color:#6b7280">${escapeHtml(r.nombreCliente||'—')}</td><td style="font-size:12px;color:#6b7280">${escapeHtml(r.nombreProveedor||'—')}</td></tr>`;
+      html += `<tr><td>${escapeHtml(r.nombre)}</td><td><span class="badge ${r.tipo}">${r.tipo}</span></td><td style="font-size:12px;color:#6b7280">${escapeHtml(r.nombreCliente||'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â')}</td><td style="font-size:12px;color:#6b7280">${escapeHtml(r.nombreProveedor||'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â')}</td></tr>`;
     }
   }
   html += '</tbody></table>';
@@ -1208,7 +1250,7 @@ function _rankingTopProveedores(data) {
 // Tabla reducida Top Clientes (solo registros con venta)
 function _renderTopClientes(data, contenedor) {
   const clientes = _rankingTopClientes(data).slice(0, TOP_N);
-  if (!clientes.length) { contenedor.innerHTML = '<div class="empty">Sin ventas en el año</div>'; return; }
+  if (!clientes.length) { contenedor.innerHTML = '<div class="empty">Sin ventas en el aÃƒÆ’Ã‚Â±o</div>'; return; }
   let html = `<table><thead><tr>
     <th class="num">#</th>
     <th data-top-clientes="nombre">Empresa</th>
@@ -1219,7 +1261,7 @@ function _renderTopClientes(data, contenedor) {
   </tr></thead><tbody>`;
   for (const r of clientes) {
     const negClass = (r.utilidad_usd||0) < 0 ? 'utilidad-neg' : '';
-    const margen = r.margen_pct === null ? '—' : r.margen_pct.toFixed(1)+'%';
+    const margen = r.margen_pct === null ? 'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â' : r.margen_pct.toFixed(1)+'%';
     html += `<tr class="${negClass}">`;
     html += `<td class="num">${r.rankingCliente}</td>`;
     html += `<td>${escapeHtml(r.nombre)}</td>`;
@@ -1245,7 +1287,7 @@ function _renderTopClientes(data, contenedor) {
 // Tabla reducida Top Proveedores (solo registros con compras)
 function _renderTopProveedores(data, contenedor) {
   const proveedores = _rankingTopProveedores(data).slice(0, TOP_N);
-  if (!proveedores.length) { contenedor.innerHTML = '<div class="empty">Sin compras en el año</div>'; return; }
+  if (!proveedores.length) { contenedor.innerHTML = '<div class="empty">Sin compras en el aÃƒÆ’Ã‚Â±o</div>'; return; }
   const monedasHdr = monedasCompra.map(m => `<th class="num" data-top-proveedores="compras_${m}">Compras ${m}</th>`).join('');
   let html = `<table><thead><tr>
     <th class="num">#</th>
@@ -1259,7 +1301,7 @@ function _renderTopProveedores(data, contenedor) {
     html += `<td>${escapeHtml(r.nombre)}</td>`;
     for (const m of monedasCompra) {
       const v = (r.compras||{})[m] || 0;
-      html += `<td class="num">${v?fmtMoneda(v,m):'—'}</td>`;
+      html += `<td class="num">${v?fmtMoneda(v,m):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
     }
     html += `<td class="num">${r.embarques_compra||0}</td>`;
     html += '</tr>';
@@ -1292,17 +1334,17 @@ function pintarTabla() {
     const nClientes = dataFiltrada.filter(r => r.tieneVenta).length;
     const nProv = dataFiltrada.filter(r => r.tieneCompra).length;
     const monedaTopProv = _monedaPrincipalTopProveedores();
-    tituloCli.innerHTML = `Top ${TOP_N} Clientes <span style="font-size:12px;color:#6b7280;font-weight:400">(por venta USD${nClientes>TOP_N?` — de ${nClientes}`:''})</span>`;
-    tituloProv.innerHTML = `Top ${TOP_N} Proveedores <span style="font-size:12px;color:#6b7280;font-weight:400">(por compras ${monedaTopProv}${nProv>TOP_N?` — de ${nProv}`:''})</span>`;
+    tituloCli.innerHTML = `Top ${TOP_N} Clientes <span style="font-size:12px;color:#6b7280;font-weight:400">(por venta USD${nClientes>TOP_N?` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â de ${nClientes}`:''})</span>`;
+    tituloProv.innerHTML = `Top ${TOP_N} Proveedores <span style="font-size:12px;color:#6b7280;font-weight:400">(por compras ${monedaTopProv}${nProv>TOP_N?` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â de ${nProv}`:''})</span>`;
     _renderTopClientes(dataOrdenada, wrapClientes);
     _renderTopProveedores(dataOrdenada, wrapProveedores);
-    // Tabla completa abajo con todas las columnas y ordenamiento dinámico
+    // Tabla completa abajo con todas las columnas y ordenamiento dinÃƒÆ’Ã‚Â¡mico
     const dataFull = _ordenar(dataFiltrada, sortKey, sortDir);
     tituloTodos.textContent = `Tabla completa (${dataFull.length} registros)`;
     panelTodos.style.display = '';
     _renderTabla(dataFull, wrapTodos);
   } else {
-    // Modo catálogo: solo una tabla con el detalle del match
+    // Modo catÃƒÆ’Ã‚Â¡logo: solo una tabla con el detalle del match
     _renderTabla(dataOrdenada, wrapClientes);
     wrapProveedores.innerHTML = '<div class="empty">Sube Excel de compras para ver proveedores</div>';
     panelTodos.style.display = 'none';
