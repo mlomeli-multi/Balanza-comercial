@@ -762,6 +762,11 @@ function fmtMoneda(n, mon) {
   return new Intl.NumberFormat('es-MX',{maximumFractionDigits:0}).format(n||0) + ' ' + mon;
 }
 
+function compactLabel(texto, max = 34) {
+  const s = (texto || '').toString().trim();
+  return s.length > max ? s.slice(0, max - 3) + '...' : s;
+}
+
 function actualizar() {
   modoOps = !!(opsVentas || opsCompras);
   monedasCompra = opsCompras ? (opsCompras.monedas || []) : [];
