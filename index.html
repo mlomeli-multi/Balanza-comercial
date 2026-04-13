@@ -9,9 +9,14 @@
 <style>
   * { box-sizing: border-box; }
   body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; background: #f4f6f9; color: #1f2937; }
-  header { background: linear-gradient(135deg,#1e3a8a,#2563eb); color: #fff; padding: 24px 32px; }
-  header h1 { margin: 0 0 4px; font-size: 22px; }
-  header p { margin: 0; opacity: .85; font-size: 14px; }
+  header { background: linear-gradient(135deg,#1e3a8a,#2563eb); color: #fff; padding: 18px 24px 24px; }
+  .header-tools { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:12px; margin-bottom:18px; }
+  .header-upload { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.24); border-radius: 12px; padding: 12px; backdrop-filter: blur(4px); }
+  .header-upload h2 { margin: 0 0 6px; font-size: 13px; font-weight: 700; }
+  .header-upload input { width: 100%; font-size: 12px; color: #fff; }
+  .header-upload .info { font-size: 11px; color: rgba(255,255,255,.82); margin-top: 6px; min-height: 28px; }
+  .header-copy h1 { margin: 0 0 4px; font-size: 22px; }
+  .header-copy p { margin: 0; opacity: .85; font-size: 14px; }
   main { padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
   .grid { display: grid; gap: 16px; }
   .cards { grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); margin-bottom: 24px; }
@@ -56,49 +61,42 @@
   button:hover { background: #1d4ed8; }
   .empty { text-align: center; padding: 40px; color: #9ca3af; }
   .help { background: #eff6ff; border-left: 4px solid #2563eb; padding: 12px 16px; border-radius: 4px; font-size: 13px; margin-bottom: 16px; }
-  @media (max-width: 1100px) { #topsGrid { grid-template-columns: 1fr !important; } }
-  @media (max-width: 800px) { .uploads, .charts { grid-template-columns: 1fr; } main { padding: 16px; } }
+  @media (max-width: 1100px) { #topsGrid, .header-tools { grid-template-columns: 1fr 1fr !important; } }
+  @media (max-width: 800px) { .uploads, .charts, .header-tools { grid-template-columns: 1fr; } main { padding: 16px; } header { padding: 16px; } }
 </style>
 </head>
 <body>
 <header>
-  <h1>Balanza Comercial</h1>
-  <p>Compara tus clientes contra tus proveedores e identifica oportunidades ganar/ganar</p>
-</header>
-<main>
-  <div id="estadoCarga" class="help" style="display:none">Cargando…</div>
-
-  <div class="uploads">
-    <div class="upload clientes">
+  <div class="header-tools">
+    <div class="header-upload">
       <h2>Catálogo de Clientes</h2>
       <input type="file" id="fileClientes" accept=".xlsx,.xls,.csv">
       <div class="info" id="infoClientes">Sin archivo</div>
     </div>
-    <div class="upload proveedores">
+    <div class="header-upload">
       <h2>Catálogo de Proveedores</h2>
       <input type="file" id="fileProveedores" accept=".xlsx,.xls,.csv">
       <div class="info" id="infoProveedores">Sin archivo</div>
     </div>
-  </div>
-
-  <div class="panel" style="background:#fffbeb;border:1px solid #fde68a">
-    <h2 style="display:flex;align-items:center;gap:8px">Datos de operación (año en curso)
-      <span style="font-size:11px;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-weight:600">LOCAL · solo tú lo ves</span>
-    </h2>
-    <p style="font-size:13px;color:#6b7280;margin:0 0 12px">Sube los Excel de <b>Venta</b> y <b>Compra</b>. Los datos se guardan solo en este navegador y se filtran al año en curso según la nomenclatura del embarque. Cada carga nueva reemplaza la anterior.</p>
-    <div class="uploads" style="margin-bottom:0">
-      <div class="upload" style="border-color:#3b82f6">
-        <h2>Excel de Ventas</h2>
-        <input type="file" id="fileVentas" accept=".xlsx,.xls,.csv">
-        <div class="info" id="infoVentas">Sin archivo</div>
-      </div>
-      <div class="upload" style="border-color:#a855f7">
-        <h2>Excel de Compras</h2>
-        <input type="file" id="fileCompras" accept=".xlsx,.xls,.csv">
-        <div class="info" id="infoCompras">Sin archivo</div>
-      </div>
+    <div class="header-upload">
+      <h2>Excel de Ventas</h2>
+      <input type="file" id="fileVentas" accept=".xlsx,.xls,.csv">
+      <div class="info" id="infoVentas">Sin archivo</div>
+    </div>
+    <div class="header-upload">
+      <h2>Excel de Compras</h2>
+      <input type="file" id="fileCompras" accept=".xlsx,.xls,.csv">
+      <div class="info" id="infoCompras">Sin archivo</div>
     </div>
   </div>
+  <div class="header-copy">
+    <h1>Balanza Comercial</h1>
+    <p>Compara tus clientes contra tus proveedores e identifica oportunidades ganar/ganar</p>
+  </div>
+</header>
+<main>
+  <div id="estadoCarga" class="help" style="display:none">Cargando…</div>
+
 
   <div class="grid cards" id="kpisWrap">
     <!-- Se llena dinámicamente desde JS -->
@@ -903,14 +901,6 @@ function pintarCharts() {
       <h2>Top 10 proveedores por compras USD</h2>
       <div class="chart-canvas-wrap"><canvas id="chartProveedoresUsd"></canvas></div>
     </div>
-    <div class="chart-box">
-      <h2>Venta por categoría</h2>
-      <div class="chart-canvas-wrap"><canvas id="chartPieCategoriaVenta"></canvas></div>
-    </div>
-    <div class="chart-box">
-      <h2>Venta por subcategoría</h2>
-      <div id="tablaSubcategoriasWrap"></div>
-    </div>
   `;
 
   const topClientes = combinado
@@ -923,8 +913,6 @@ function pintarCharts() {
     .slice()
     .sort((a, b) => (((b.compras || {}).USD || 0) - ((a.compras || {}).USD || 0)))
     .slice(0, 10);
-  const categoriasVenta = _sumarVentasPorCategoria();
-  const subcategoriasVenta = _sumarVentasPorSubcategoria();
 
   destruirChart(chartC);
   destruirChart(chartP);
@@ -992,36 +980,8 @@ function pintarCharts() {
     chartP = null;
   }
 
-  const ctxPie = document.getElementById('chartPieCategoriaVenta');
-  if (categoriasVenta.length) {
-    chartPieVenta = new Chart(ctxPie, {
-      type: 'pie',
-      data: {
-        labels: categoriasVenta.map(r => r.cat),
-        datasets: [{
-          data: categoriasVenta.map(r => r.ingreso || 0),
-          backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#7c3aed', '#ef4444']
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom' },
-          tooltip: {
-            callbacks: {
-              label: ctx => `${ctx.label}: ${fmtMoneda(ctx.parsed, 'USD')}`
-            }
-          }
-        }
-      }
-    });
-  } else {
-    ctxPie.replaceWith(_emptyChartMessage('Sin ventas clasificadas por categoría.'));
-    chartPieVenta = null;
-  }
+  chartPieVenta = null;
 
-  _renderSubcategoriasVenta(subcategoriasVenta, document.getElementById('tablaSubcategoriasWrap'));
 }
 
 function _emptyChartMessage(texto) {
@@ -1059,11 +1019,16 @@ function _renderSubcategoriasVenta(data, contenedor) {
 }
 
 function pintarBilaterales() {
-  const bil = combinado.filter(r=>r.tipo==='ambos');
+  const bilCatalogo = combinado.filter(r=>r.tipo==='ambos');
   const wrap = document.getElementById('bilateralWrap');
-  if (!bil.length) { wrap.innerHTML = '<div class="empty">No hay empresas que sean cliente y proveedor a la vez</div>'; return; }
+  if (!bilCatalogo.length) { wrap.innerHTML = '<div class="empty">No hay empresas que sean cliente y proveedor a la vez</div>'; return; }
 
   if (modoOps) {
+    const bil = bilCatalogo.filter(r => r.tieneVenta || r.tieneCompra);
+    if (!bil.length) {
+      wrap.innerHTML = '<div class="empty">No hay relaciones bilaterales con actividad en los archivos cargados</div>';
+      return;
+    }
     // ordenar por suma de actividad (venta USD + compras USD), luego nombre
     bil.sort((a,b) => {
       const aTot = (a.venta_usd||0) + (a.compras['USD']||0);
@@ -1071,7 +1036,7 @@ function pintarBilaterales() {
       return bTot - aTot;
     });
     const monedasHdr = monedasCompra.map(m => `<th class="num">Compras ${m}</th>`).join('');
-    let html = `<p style="font-size:13px;color:#374151;margin:0 0 12px"><b>${bil.length} relaciones bilaterales</b> en el catálogo. Para cada una se muestra venta y compras del año en curso.</p>`;
+    let html = `<p style="font-size:13px;color:#374151;margin:0 0 12px"><b>${bil.length} relaciones bilaterales activas</b> con datos leidos en ventas y/o compras. Se ocultan coincidencias del catalogo sin movimiento.</p>`;
     html += `<table><thead><tr><th>Empresa</th><th class="num">Venta USD</th><th class="num">Utilidad USD</th>${monedasHdr}<th class="num">Balanza USD</th><th>Oportunidad</th></tr></thead><tbody>`;
     for (const r of bil) {
       const oportunidad = _oportunidadTexto(r);
@@ -1090,6 +1055,7 @@ function pintarBilaterales() {
     html += '</tbody></table>';
     wrap.innerHTML = html;
   } else {
+    const bil = bilCatalogo.slice();
     bil.sort((a,b)=>a.nombre.localeCompare(b.nombre));
     let html = `<p style="font-size:13px;color:#374151;margin:0 0 12px"><b>${bil.length} coincidencias</b> entre tu catálogo de clientes y proveedores. Sube los Excel de operación para ver venta, utilidad y compras de cada uno.</p>`;
     html += '<table><thead><tr><th>#</th><th>Nombre como cliente</th><th>Nombre como proveedor</th></tr></thead><tbody>';
