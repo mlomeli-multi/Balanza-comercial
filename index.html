@@ -139,20 +139,20 @@
   </div>
 </header>
 <main>
-  <div id="estadoCarga" class="help" style="display:none">CargandoÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</div>
+  <div id="estadoCarga" class="help" style="display:none">Cargando...</div>
 
 
   <div class="grid cards" id="kpisWrap">
-    <!-- Se llena dinÃƒÆ’Ã‚Â¡micamente desde JS -->
+    <!-- Se llena dinamicamente desde JS -->
   </div>
 
   <div class="charts" id="chartsWrap" style="display:none">
-    <!-- Las grÃƒÆ’Ã‚Â¡ficas se construyen en el Commit C -->
+    <!-- Las graficas se construyen en el Commit C -->
   </div>
 
   <div class="panel" style="margin-top:24px">
     <h2>Oportunidades Ganar/Ganar (relaciones bilaterales)</h2>
-    <p style="font-size:13px;color:#6b7280;margin:0 0 12px">Empresas que aparecen como clientes <b>y</b> proveedores. Una balanza desbalanceada es una oportunidad de negociaciÃƒÆ’Ã‚Â³n.</p>
+    <p style="font-size:13px;color:#6b7280;margin:0 0 12px">Empresas que aparecen como clientes <b>y</b> proveedores. Una balanza desbalanceada es una oportunidad de negociacion.</p>
     <div id="bilateralWrap"><div class="empty">Sube ambos archivos para ver oportunidades</div></div>
   </div>
 
@@ -198,53 +198,53 @@ let datosProveedores = [];
 let combinado = [];
 let chartC = null, chartP = null, chartPieVenta = null;
 
-// Datos de operaciÃƒÆ’Ã‚Â³n (ventas / compras procesadas desde Excel)
+// Datos de operaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n (ventas / compras procesadas desde Excel)
 let opsVentas = null;   // {actualizado, archivo, total_usd, utilidad_usd, registros:{...}, descartados:{...}}
 let opsCompras = null;  // {actualizado, archivo, monedas:[], registros:{...}, descartados:{...}}
 const LS_KEY = 'balanza_ops_v1';
 const ANIO_ACTUAL = new Date().getFullYear();
 
-// === ClasificaciÃƒÆ’Ã‚Â³n de embarques por prefijo ===
+// === ClasificaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de embarques por prefijo ===
 // Fuente: tabla proporcionada por el usuario (AIR/SEA/OTR/PROYECTO)
 const CLASIFICACION_EMBARQUE = {
   // AIR
-  IA:  {cat:'AIR', sub:'ImportaciÃƒÆ’Ã‚Â³n AÃƒÆ’Ã‚Â©rea'},
-  EA:  {cat:'AIR', sub:'ExportaciÃƒÆ’Ã‚Â³n AÃƒÆ’Ã‚Â©rea'},
-  IH:  {cat:'AIR', sub:'ImportaciÃƒÆ’Ã‚Â³n Handcarry'},
-  EH:  {cat:'AIR', sub:'ExportaciÃƒÆ’Ã‚Â³n Handcarry'},
-  DH:  {cat:'AIR', sub:'DomÃƒÆ’Ã‚Â©stico Handcarry'},
-  DA:  {cat:'AIR', sub:'DomÃƒÆ’Ã‚Â©stico AÃƒÆ’Ã‚Â©reo'},
-  IC:  {cat:'AIR', sub:'ImportaciÃƒÆ’Ã‚Â³n Charter'},
-  EC:  {cat:'AIR', sub:'ExportaciÃƒÆ’Ã‚Â³n Charter'},
-  DC:  {cat:'AIR', sub:'DomÃƒÆ’Ã‚Â©stico Charter'},
-  AA:  {cat:'AIR', sub:'Arrastre AÃƒÆ’Ã‚Â©reo'},
+  IA:  {cat:'AIR', sub:'ImportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©rea'},
+  EA:  {cat:'AIR', sub:'ExportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©rea'},
+  IH:  {cat:'AIR', sub:'ImportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Handcarry'},
+  EH:  {cat:'AIR', sub:'ExportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Handcarry'},
+  DH:  {cat:'AIR', sub:'DomÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©stico Handcarry'},
+  DA:  {cat:'AIR', sub:'DomÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©stico AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©reo'},
+  IC:  {cat:'AIR', sub:'ImportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Charter'},
+  EC:  {cat:'AIR', sub:'ExportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Charter'},
+  DC:  {cat:'AIR', sub:'DomÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©stico Charter'},
+  AA:  {cat:'AIR', sub:'Arrastre AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©reo'},
   // SEA
-  EM:  {cat:'SEA', sub:'ExportaciÃƒÆ’Ã‚Â³n MarÃƒÆ’Ã‚Â­tima'},
-  IM:  {cat:'SEA', sub:'ImportaciÃƒÆ’Ã‚Â³n MarÃƒÆ’Ã‚Â­tima'},
-  DM:  {cat:'SEA', sub:'DomÃƒÆ’Ã‚Â©stico MarÃƒÆ’Ã‚Â­timo'},
-  AM:  {cat:'SEA', sub:'Arrastre MarÃƒÆ’Ã‚Â­timo'},
+  EM:  {cat:'SEA', sub:'ExportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n MarÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­tima'},
+  IM:  {cat:'SEA', sub:'ImportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n MarÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­tima'},
+  DM:  {cat:'SEA', sub:'DomÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©stico MarÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­timo'},
+  AM:  {cat:'SEA', sub:'Arrastre MarÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­timo'},
   // OTR
-  DT:  {cat:'OTR', sub:'DomÃƒÆ’Ã‚Â©stico Terrestre'},
-  ET:  {cat:'OTR', sub:'ExportaciÃƒÆ’Ã‚Â³n Terrestre'},
-  IT:  {cat:'OTR', sub:'ImportaciÃƒÆ’Ã‚Â³n Terrestre'},
+  DT:  {cat:'OTR', sub:'DomÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©stico Terrestre'},
+  ET:  {cat:'OTR', sub:'ExportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Terrestre'},
+  IT:  {cat:'OTR', sub:'ImportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Terrestre'},
   WH:  {cat:'OTR', sub:'Wharehouse'},
   // PROYECTO
-  DP:  {cat:'PROYECTO', sub:'DomÃƒÆ’Ã‚Â©stico Proyecto'},
-  EP:  {cat:'PROYECTO', sub:'ExportaciÃƒÆ’Ã‚Â³n DomÃƒÆ’Ã‚Â©stica'},
-  IP:  {cat:'PROYECTO', sub:'ImportaciÃƒÆ’Ã‚Â³n DomÃƒÆ’Ã‚Â©stico'},
-  DPA: {cat:'PROYECTO', sub:'DomÃƒÆ’Ã‚Â©stico Proyecto AÃƒÆ’Ã‚Â©reo'},
-  EPA: {cat:'PROYECTO', sub:'ExportaciÃƒÆ’Ã‚Â³n Proyecto AÃƒÆ’Ã‚Â©reo'},
-  IPA: {cat:'PROYECTO', sub:'ImportaciÃƒÆ’Ã‚Â³n Proyecto AÃƒÆ’Ã‚Â©reo'},
-  APM: {cat:'PROYECTO', sub:'Arrastre Proyecto MarÃƒÆ’Ã‚Â­timo'},
-  EPM: {cat:'PROYECTO', sub:'ExportaciÃƒÆ’Ã‚Â³n Proyecto MarÃƒÆ’Ã‚Â­timo'},
-  IPM: {cat:'PROYECTO', sub:'ImportaciÃƒÆ’Ã‚Â³n Proyecto MarÃƒÆ’Ã‚Â­timo'},
-  DPT: {cat:'PROYECTO', sub:'DomÃƒÆ’Ã‚Â©stico Proyecto Terrestre'},
-  EPT: {cat:'PROYECTO', sub:'ExportaciÃƒÆ’Ã‚Â³n Proyecto Terrestre'},
-  IPT: {cat:'PROYECTO', sub:'ImportaciÃƒÆ’Ã‚Â³n Proyecto Terrestre'},
+  DP:  {cat:'PROYECTO', sub:'DomÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©stico Proyecto'},
+  EP:  {cat:'PROYECTO', sub:'ExportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n DomÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©stica'},
+  IP:  {cat:'PROYECTO', sub:'ImportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n DomÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©stico'},
+  DPA: {cat:'PROYECTO', sub:'DomÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©stico Proyecto AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©reo'},
+  EPA: {cat:'PROYECTO', sub:'ExportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Proyecto AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©reo'},
+  IPA: {cat:'PROYECTO', sub:'ImportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Proyecto AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©reo'},
+  APM: {cat:'PROYECTO', sub:'Arrastre Proyecto MarÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­timo'},
+  EPM: {cat:'PROYECTO', sub:'ExportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Proyecto MarÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­timo'},
+  IPM: {cat:'PROYECTO', sub:'ImportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Proyecto MarÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­timo'},
+  DPT: {cat:'PROYECTO', sub:'DomÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©stico Proyecto Terrestre'},
+  EPT: {cat:'PROYECTO', sub:'ExportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Proyecto Terrestre'},
+  IPT: {cat:'PROYECTO', sub:'ImportaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n Proyecto Terrestre'},
 };
 
-// Parser del embarque: extrae prefijo, aÃƒÆ’Ã‚Â±o y mes
-// Ej. "DT-202604-1389" ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ {prefijo:"DT", anio:2026, mes:4, cat:"OTR", sub:"DomÃƒÆ’Ã‚Â©stico Terrestre"}
+// Parser del embarque: extrae prefijo, aÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±o y mes
+// Ej. "DT-202604-1389" ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ {prefijo:"DT", anio:2026, mes:4, cat:"OTR", sub:"DomÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©stico Terrestre"}
 function parseEmbarque(s) {
   if (!s) return null;
   const m = String(s).trim().toUpperCase().match(/^([A-Z]+)-(\d{4})(\d{2})-/);
@@ -274,9 +274,9 @@ function normEstatus(s) {
 const fmt = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n||0);
 const norm = s => (s||'').toString().trim().toUpperCase().replace(/[.,]/g,'').replace(/\s+/g,' ');
 
-// NormalizaciÃƒÆ’Ã‚Â³n agresiva: quita acentos, parÃƒÆ’Ã‚Â©ntesis, puntuaciÃƒÆ’Ã‚Â³n y sufijos de empresa
+// NormalizaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n agresiva: quita acentos, parÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©ntesis, puntuaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n y sufijos de empresa
 const STOPWORDS = new Set(['LTD','LTDA','LIMITED','INC','GMBH','SA','SAS','SRL','LLC','CO','CORP','COMPANY','PVT','SPA','BV','AG','KG','AB','AS','OY','SL','DE','CV','SP','ZRT','KFT','FZC','FZCO','FZE','NV','S','R','L','Z','O','THE','AND','OF','VE','TIC','TICARET','LDA','SAN','SRO','RL']);
-// Aliases para corregir typos / variantes conocidas (token -> token canÃƒÆ’Ã‚Â³nico)
+// Aliases para corregir typos / variantes conocidas (token -> token canÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³nico)
 const TOKEN_ALIASES = {'TIMECRTI':'TIMECRITI'};
 const NORMALIZED_ALIASES = {
   'TIME MATTERS AMERICAS': 'TIME MATTERS',
@@ -375,13 +375,13 @@ function procesar(rows) {
 // ==== PROCESAMIENTO DE EXCEL DE VENTAS ====
 // Columnas (0-based): C=2 Embarque, I=8 Cliente, J=9 Ingreso, L=11 Neto Final
 function procesarVentas(matriz) {
-  // matriz es un arreglo de arreglos (row ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ [col A, col B, ...])
+  // matriz es un arreglo de arreglos (row ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ [col A, col B, ...])
   // Fila 0 es encabezado, los datos empiezan en la fila 1
   const porCliente = new Map();
   let procesadas = 0;
   const descartadas = {sinEmbarque:0, anioDistinto:0, sinCatalogo:0, sinCliente:0};
 
-  // Construir ÃƒÆ’Ã‚Â­ndice normalizado del catÃƒÆ’Ã‚Â¡logo de clientes
+  // Construir ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­ndice normalizado del catÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡logo de clientes
   const catIndex = new Map();
   const catalogoPreparado = [];
   for (const c of datosClientes) {
@@ -458,7 +458,7 @@ function procesarCompras(matriz) {
   const descartadas = {sinEmbarque:0, anioDistinto:0, estatusEmb:0, estatusProv:0, sinCatalogo:0, sinProveedor:0};
   const monedasSet = new Set();
 
-  // ÃƒÆ’Ã‚Ândice del catÃƒÆ’Ã‚Â¡logo de proveedores
+  // ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Ândice del catÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡logo de proveedores
   const catIndex = new Map();
   const catalogoPreparado = [];
   for (const p of datosProveedores) {
@@ -494,7 +494,7 @@ function procesarCompras(matriz) {
         nombre: nombreCatalogo,
         compras: {},     // por moneda
         embarques: 0,
-        porCategoria: {}, // cat ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ {moneda: monto, count}
+        porCategoria: {}, // cat ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ {moneda: monto, count}
         porSubcategoria: {}
       });
     }
@@ -614,7 +614,7 @@ function leerExcelComoMatriz(file, cb) {
   reader.readAsArrayBuffer(file);
 }
 
-// ==== RENDER DE INFO DE OPERACIÃƒÆ’Ã¢â‚¬Å“N (resumen en los uploads) ====
+// ==== RENDER DE INFO DE OPERACIÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“N (resumen en los uploads) ====
 function fmtNum(n) { return new Intl.NumberFormat('es-MX',{maximumFractionDigits:0}).format(n||0); }
 function fmtUSD(n) { return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n||0); }
 
@@ -625,7 +625,7 @@ function renderInfoVentas() {
   const d = opsVentas.descartadas || {};
   const descTotal = (d.sinEmbarque||0)+(d.anioDistinto||0)+(d.sinCatalogo||0)+(d.sinCliente||0);
   const fecha = new Date(opsVentas.actualizado).toLocaleString('es-MX');
-  info.innerHTML = `<span class="info-label">Resumen</span><span class="info-main">${fmtUSD(opsVentas.total_usd)}</span><span class="info-sub">${nClientes} clientes Ã‚Â· ${fmtNum(opsVentas.procesadas)} embarques Ã‚Â· utilidad ${fmtUSD(opsVentas.utilidad_usd)}</span><span class="info-meta">${descTotal} descartadas Ã‚Â· actualizado ${fecha}</span>`;
+  info.innerHTML = `<span class="info-label">Resumen</span><span class="info-main">${fmtUSD(opsVentas.total_usd)}</span><span class="info-sub">${nClientes} clientes | ${fmtNum(opsVentas.procesadas)} embarques | utilidad ${fmtUSD(opsVentas.utilidad_usd)}</span><span class="info-meta">${descTotal} descartadas | actualizado ${fecha}</span>`;
 }
 
 function renderInfoCompras() {
@@ -636,11 +636,11 @@ function renderInfoCompras() {
   const descTotal = Object.values(d).reduce((s,x)=>s+(x||0),0);
   const fecha = new Date(opsCompras.actualizado).toLocaleString('es-MX');
   const totalesStr = Object.entries(opsCompras.totalesPorMoneda||{})
-    .map(([m,v]) => `${fmtNum(v)} ${m}`).join(' Ã‚Â· ') || 'Sin montos';
-  info.innerHTML = `<span class="info-label">Resumen</span><span class="info-main">${nProv} proveedores</span><span class="info-sub">${fmtNum(opsCompras.procesadas)} embarques Ã‚Â· ${totalesStr}</span><span class="info-meta">${descTotal} descartadas Ã‚Â· actualizado ${fecha}</span>`;
+    .map(([m,v]) => `${fmtNum(v)} ${m}`).join(' | ') || 'Sin montos';
+  info.innerHTML = `<span class="info-label">Resumen</span><span class="info-main">${nProv} proveedores</span><span class="info-sub">${fmtNum(opsCompras.procesadas)} embarques | ${totalesStr}</span><span class="info-meta">${descTotal} descartadas | actualizado ${fecha}</span>`;
 }
 
-// ==== EVENT LISTENERS DE LOS UPLOADS DE OPERACIÃƒÆ’Ã¢â‚¬Å“N ====
+// ==== EVENT LISTENERS DE LOS UPLOADS DE OPERACIÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“N ====
 document.getElementById('fileVentas').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
   refrescarCatalogos().then(() => {
@@ -666,7 +666,7 @@ document.getElementById('fileCompras').addEventListener('change', e => {
   });
 });
 document.getElementById('btnLimpiarOps').addEventListener('click', () => {
-  if (!confirm('Ãƒâ€šÃ‚Â¿Borrar los datos de ventas y compras guardados en este navegador?')) return;
+  if (!confirm('ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿Borrar los datos de ventas y compras guardados en este navegador?')) return;
   aplicarOpsDesdePayload({ventas:null, compras:null});
 });
 document.getElementById('btnDescargarBackup').addEventListener('click', () => {
@@ -752,8 +752,8 @@ async function refrescarCatalogos() {
 
 inicializar();
 
-let modoOps = false;          // hay datos de operaciÃƒÆ’Ã‚Â³n cargados
-let monedasCompra = [];       // ['USD','EUR',...] dinÃƒÆ’Ã‚Â¡mico
+let modoOps = false;          // hay datos de operaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n cargados
+let monedasCompra = [];       // ['USD','EUR',...] dinÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡mico
 
 function fmtMoneda(n, mon) {
   if (mon === 'USD') return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n||0);
@@ -766,10 +766,10 @@ function actualizar() {
   modoOps = !!(opsVentas || opsCompras);
   monedasCompra = opsCompras ? (opsCompras.monedas || []) : [];
 
-  // Construir combinado: catÃƒÆ’Ã‚Â¡logo de clientes/proveedores + datos de operaciÃƒÆ’Ã‚Â³n si existen
+  // Construir combinado: catÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡logo de clientes/proveedores + datos de operaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n si existen
   const map = new Map();
 
-  // 1. Sembrar con catÃƒÆ’Ã‚Â¡logo
+  // 1. Sembrar con catÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡logo
   for (const c of datosClientes) {
     const k = normCore(c.nombre);
     if (!k) continue;
@@ -846,16 +846,16 @@ function pintarKpis() {
   const bilaterales = combinado.filter(r => r.tipo === 'ambos').length;
 
   if (!modoOps) {
-    html += card('Clientes', datosClientes.length, 'en catÃƒÆ’Ã‚Â¡logo');
-    html += card('Proveedores', datosProveedores.length, 'en catÃƒÆ’Ã‚Â¡logo');
+    html += card('Clientes', datosClientes.length, 'en catalogo');
+    html += card('Proveedores', datosProveedores.length, 'en catalogo');
     html += card('Bilaterales', bilaterales, 'cliente y proveedor');
-    html += card('Estado', 'CatÃƒÆ’Ã‚Â¡logo', 'sin datos de operaciÃƒÆ’Ã‚Â³n');
+    html += card('Estado', 'Catalogo', 'sin datos de operacion');
   } else {
     // Venta USD
     if (opsVentas) {
       const margenPct = opsVentas.total_usd ? (opsVentas.utilidad_usd/opsVentas.total_usd*100) : 0;
       html += card('Venta ' + ANIO_ACTUAL + ' (USD)', fmtMoneda(opsVentas.total_usd, 'USD'),
-        `${opsVentas.procesadas} embarques Ãƒâ€šÃ‚Â· ${Object.keys(opsVentas.registros||{}).length} clientes`);
+        `${opsVentas.procesadas} embarques | ${Object.keys(opsVentas.registros||{}).length} clientes`);
       html += card('Utilidad ' + ANIO_ACTUAL + ' (USD)', fmtMoneda(opsVentas.utilidad_usd, 'USD'),
         `Margen ${margenPct.toFixed(1)}%`,
         opsVentas.utilidad_usd < 0 ? 'neg' : 'pos');
@@ -871,11 +871,11 @@ function pintarKpis() {
     // Balanza USD (solo si hay venta y compra USD)
     if (opsVentas && opsCompras && (opsCompras.totalesPorMoneda||{})['USD']) {
       const bal = opsVentas.total_usd - (opsCompras.totalesPorMoneda['USD']||0);
-      html += card('Balanza USD', fmtMoneda(bal,'USD'), 'venta ÃƒÂ¢Ã‹â€ Ã¢â‚¬â„¢ compras', bal>=0?'pos':'neg');
+      html += card('Balanza USD', fmtMoneda(bal,'USD'), 'venta menos compras', bal>=0?'pos':'neg');
     }
-    // Bilaterales con operaciÃƒÆ’Ã‚Â³n
+    // Bilaterales con operaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n
     const bilOps = combinado.filter(r => r.tipo==='ambos' && (r.tieneVenta || r.tieneCompra)).length;
-    html += card('Bilaterales activos', bilOps, `${bilaterales} en catÃƒÆ’Ã‚Â¡logo`);
+    html += card('Bilaterales activos', bilOps, `${bilaterales} en catalogo`);
   }
 
   wrap.innerHTML = html;
@@ -965,7 +965,7 @@ function pintarCharts() {
     chartC = new Chart(ctxClientes, {
       type: 'bar',
       data: {
-        labels: topClientes.map(r => r.nombre),
+        labels: topClientes.map(r => compactLabel(r.nombre)),
         datasets: [{
           label: 'Venta USD',
           data: topClientes.map(r => r.venta_usd || 0),
@@ -978,11 +978,16 @@ function pintarCharts() {
         maintainAspectRatio: false,
         indexAxis: 'y',
         plugins: {
-          legend: { display: false }
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: items => topClientes[items[0].dataIndex]?.nombre || ''
+            }
+          }
         },
         scales: {
           x: { beginAtZero: true },
-          y: { ticks: { autoSkip: false } }
+          y: { ticks: { autoSkip: false, font: { size: 11 } } }
         }
       }
     });
@@ -996,7 +1001,7 @@ function pintarCharts() {
     chartP = new Chart(ctxProveedores, {
       type: 'bar',
       data: {
-        labels: topProveedoresUsd.map(r => r.nombre),
+        labels: topProveedoresUsd.map(r => compactLabel(r.nombre)),
         datasets: [{
           label: 'Compras USD',
           data: topProveedoresUsd.map(r => (r.compras || {}).USD || 0),
@@ -1009,11 +1014,16 @@ function pintarCharts() {
         maintainAspectRatio: false,
         indexAxis: 'y',
         plugins: {
-          legend: { display: false }
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: items => topProveedoresUsd[items[0].dataIndex]?.nombre || ''
+            }
+          }
         },
         scales: {
           x: { beginAtZero: true },
-          y: { ticks: { autoSkip: false } }
+          y: { ticks: { autoSkip: false, font: { size: 11 } } }
         }
       }
     });
@@ -1035,13 +1045,13 @@ function _emptyChartMessage(texto) {
 
 function _renderSubcategoriasVenta(data, contenedor) {
   if (!data.length) {
-    contenedor.innerHTML = '<div class="empty">Sin subcategorÃƒÆ’Ã‚Â­as de venta para mostrar</div>';
+    contenedor.innerHTML = '<div class="empty">Sin subcategorÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­as de venta para mostrar</div>';
     return;
   }
   let html = `<table><thead><tr>
     <th>Prefijo</th>
     <th>Servicio</th>
-    <th>CategorÃƒÆ’Ã‚Â­a</th>
+    <th>CategorÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­a</th>
     <th class="num">Venta USD</th>
     <th class="num">Utilidad USD</th>
     <th class="num">Emb.</th>
@@ -1084,13 +1094,13 @@ function pintarBilaterales() {
       const oportunidad = _oportunidadTexto(r);
       const negClass = (r.utilidad_usd||0) < 0 ? 'utilidad-neg' : '';
       let row = `<tr class="${negClass}"><td><b>${escapeHtml(r.nombre)}</b></td>`;
-      row += `<td class="num">${r.venta_usd?fmtMoneda(r.venta_usd,'USD'):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
-      row += `<td class="num ${(r.utilidad_usd||0)<0?'neg':''}">${r.venta_usd?fmtMoneda(r.utilidad_usd,'USD'):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
+      row += `<td class="num">${r.venta_usd?fmtMoneda(r.venta_usd,'USD'):'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â'}</td>`;
+      row += `<td class="num ${(r.utilidad_usd||0)<0?'neg':''}">${r.venta_usd?fmtMoneda(r.utilidad_usd,'USD'):'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â'}</td>`;
       for (const m of monedasCompra) {
         const v = (r.compras||{})[m] || 0;
-        row += `<td class="num">${v?fmtMoneda(v,m):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
+        row += `<td class="num">${v?fmtMoneda(v,m):'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â'}</td>`;
       }
-      row += `<td class="num ${r.balanza_usd>=0?'pos':'neg'}">${(r.venta_usd||r.compras['USD'])?fmtMoneda(r.balanza_usd,'USD'):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
+      row += `<td class="num ${r.balanza_usd>=0?'pos':'neg'}">${(r.venta_usd||r.compras['USD'])?fmtMoneda(r.balanza_usd,'USD'):'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â'}</td>`;
       row += `<td style="font-size:11px">${oportunidad}</td></tr>`;
       html += row;
     }
@@ -1099,7 +1109,7 @@ function pintarBilaterales() {
   } else {
     const bil = bilCatalogo.slice();
     bil.sort((a,b)=>a.nombre.localeCompare(b.nombre));
-    let html = `<p style="font-size:13px;color:#374151;margin:0 0 12px"><b>${bil.length} coincidencias</b> entre tu catÃƒÆ’Ã‚Â¡logo de clientes y proveedores. Sube los Excel de operaciÃƒÆ’Ã‚Â³n para ver venta, utilidad y compras de cada uno.</p>`;
+    let html = `<p style="font-size:13px;color:#374151;margin:0 0 12px"><b>${bil.length} coincidencias</b> entre tu catÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡logo de clientes y proveedores. Sube los Excel de operaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n para ver venta, utilidad y compras de cada uno.</p>`;
     html += '<table><thead><tr><th>#</th><th>Nombre como cliente</th><th>Nombre como proveedor</th></tr></thead><tbody>';
     bil.forEach((r,i) => {
       html += `<tr><td>${i+1}</td><td>${escapeHtml(r.nombreCliente||'')}</td><td>${escapeHtml(r.nombreProveedor||'')}</td></tr>`;
@@ -1112,11 +1122,11 @@ function pintarBilaterales() {
 function _oportunidadTexto(r) {
   const v = r.venta_usd || 0;
   const cUsd = (r.compras||{})['USD'] || 0;
-  if (!v && !cUsd) return 'Sin actividad en el aÃƒÆ’Ã‚Â±o';
-  if (v && !cUsd) return 'Solo te compran. PÃƒÆ’Ã‚Â­deles que te contraten tambiÃƒÆ’Ã‚Â©n.';
-  if (!v && cUsd) return 'Solo les compras. OfrÃƒÆ’Ã‚Â©celes servicios para reciprocidad.';
-  if (r.balanza_usd > 0) return 'Vendes mÃƒÆ’Ã‚Â¡s de lo que les compras. Tienes palanca.';
-  if (r.balanza_usd < 0) return 'Les compras mÃƒÆ’Ã‚Â¡s. Exige mayor reciprocidad.';
+  if (!v && !cUsd) return 'Sin actividad en el aÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±o';
+  if (v && !cUsd) return 'Solo te compran. PÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­deles que te contraten tambiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©n.';
+  if (!v && cUsd) return 'Solo les compras. OfrÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©celes servicios para reciprocidad.';
+  if (r.balanza_usd > 0) return 'Vendes mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡s de lo que les compras. Tienes palanca.';
+  if (r.balanza_usd < 0) return 'Les compras mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡s. Exige mayor reciprocidad.';
   return 'Equilibrado.';
 }
 
@@ -1173,25 +1183,25 @@ function _renderTabla(data, contenedor) {
     for (const r of data) {
       const negClass = (r.utilidad_usd||0) < 0 ? 'utilidad-neg' : '';
       const tipoBadge = r.tipo;
-      const margen = r.margen_pct === null ? 'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â' : r.margen_pct.toFixed(1)+'%';
+      const margen = r.margen_pct === null ? 'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â' : r.margen_pct.toFixed(1)+'%';
       html += `<tr class="${negClass}">`;
       html += `<td>${escapeHtml(r.nombre)}</td>`;
       html += `<td><span class="badge ${tipoBadge}">${tipoBadge}</span></td>`;
-      html += `<td class="num">${r.venta_usd?fmtMoneda(r.venta_usd,'USD'):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
-      html += `<td class="num ${(r.utilidad_usd||0)<0?'neg':((r.utilidad_usd||0)>0?'pos':'')}">${r.venta_usd?fmtMoneda(r.utilidad_usd,'USD'):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
+      html += `<td class="num">${r.venta_usd?fmtMoneda(r.venta_usd,'USD'):'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â'}</td>`;
+      html += `<td class="num ${(r.utilidad_usd||0)<0?'neg':((r.utilidad_usd||0)>0?'pos':'')}">${r.venta_usd?fmtMoneda(r.utilidad_usd,'USD'):'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â'}</td>`;
       html += `<td class="num">${margen}</td>`;
       for (const m of monedasCompra) {
         const v = (r.compras||{})[m] || 0;
-        html += `<td class="num">${v?fmtMoneda(v,m):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
+        html += `<td class="num">${v?fmtMoneda(v,m):'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â'}</td>`;
       }
-      html += `<td class="num">${r.embarques_venta||'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
-      html += `<td class="num">${r.embarques_compra||'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
+      html += `<td class="num">${r.embarques_venta||'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â'}</td>`;
+      html += `<td class="num">${r.embarques_compra||'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â'}</td>`;
       html += '</tr>';
     }
   } else {
     html = '<table><thead><tr><th data-k="nombre">Empresa</th><th data-k="tipo">Tipo</th><th>Como cliente</th><th>Como proveedor</th></tr></thead><tbody>';
     for (const r of data) {
-      html += `<tr><td>${escapeHtml(r.nombre)}</td><td><span class="badge ${r.tipo}">${r.tipo}</span></td><td style="font-size:12px;color:#6b7280">${escapeHtml(r.nombreCliente||'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â')}</td><td style="font-size:12px;color:#6b7280">${escapeHtml(r.nombreProveedor||'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â')}</td></tr>`;
+      html += `<tr><td>${escapeHtml(r.nombre)}</td><td><span class="badge ${r.tipo}">${r.tipo}</span></td><td style="font-size:12px;color:#6b7280">${escapeHtml(r.nombreCliente||'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â')}</td><td style="font-size:12px;color:#6b7280">${escapeHtml(r.nombreProveedor||'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â')}</td></tr>`;
     }
   }
   html += '</tbody></table>';
@@ -1250,7 +1260,7 @@ function _rankingTopProveedores(data) {
 // Tabla reducida Top Clientes (solo registros con venta)
 function _renderTopClientes(data, contenedor) {
   const clientes = _rankingTopClientes(data).slice(0, TOP_N);
-  if (!clientes.length) { contenedor.innerHTML = '<div class="empty">Sin ventas en el aÃƒÆ’Ã‚Â±o</div>'; return; }
+  if (!clientes.length) { contenedor.innerHTML = '<div class="empty">Sin ventas en el aÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±o</div>'; return; }
   let html = `<table><thead><tr>
     <th class="num">#</th>
     <th data-top-clientes="nombre">Empresa</th>
@@ -1261,7 +1271,7 @@ function _renderTopClientes(data, contenedor) {
   </tr></thead><tbody>`;
   for (const r of clientes) {
     const negClass = (r.utilidad_usd||0) < 0 ? 'utilidad-neg' : '';
-    const margen = r.margen_pct === null ? 'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â' : r.margen_pct.toFixed(1)+'%';
+    const margen = r.margen_pct === null ? 'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â' : r.margen_pct.toFixed(1)+'%';
     html += `<tr class="${negClass}">`;
     html += `<td class="num">${r.rankingCliente}</td>`;
     html += `<td>${escapeHtml(r.nombre)}</td>`;
@@ -1287,7 +1297,7 @@ function _renderTopClientes(data, contenedor) {
 // Tabla reducida Top Proveedores (solo registros con compras)
 function _renderTopProveedores(data, contenedor) {
   const proveedores = _rankingTopProveedores(data).slice(0, TOP_N);
-  if (!proveedores.length) { contenedor.innerHTML = '<div class="empty">Sin compras en el aÃƒÆ’Ã‚Â±o</div>'; return; }
+  if (!proveedores.length) { contenedor.innerHTML = '<div class="empty">Sin compras en el aÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±o</div>'; return; }
   const monedasHdr = monedasCompra.map(m => `<th class="num" data-top-proveedores="compras_${m}">Compras ${m}</th>`).join('');
   let html = `<table><thead><tr>
     <th class="num">#</th>
@@ -1301,7 +1311,7 @@ function _renderTopProveedores(data, contenedor) {
     html += `<td>${escapeHtml(r.nombre)}</td>`;
     for (const m of monedasCompra) {
       const v = (r.compras||{})[m] || 0;
-      html += `<td class="num">${v?fmtMoneda(v,m):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>`;
+      html += `<td class="num">${v?fmtMoneda(v,m):'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â'}</td>`;
     }
     html += `<td class="num">${r.embarques_compra||0}</td>`;
     html += '</tr>';
@@ -1334,17 +1344,17 @@ function pintarTabla() {
     const nClientes = dataFiltrada.filter(r => r.tieneVenta).length;
     const nProv = dataFiltrada.filter(r => r.tieneCompra).length;
     const monedaTopProv = _monedaPrincipalTopProveedores();
-    tituloCli.innerHTML = `Top ${TOP_N} Clientes <span style="font-size:12px;color:#6b7280;font-weight:400">(por venta USD${nClientes>TOP_N?` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â de ${nClientes}`:''})</span>`;
-    tituloProv.innerHTML = `Top ${TOP_N} Proveedores <span style="font-size:12px;color:#6b7280;font-weight:400">(por compras ${monedaTopProv}${nProv>TOP_N?` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â de ${nProv}`:''})</span>`;
+    tituloCli.innerHTML = `Top ${TOP_N} Clientes <span style="font-size:12px;color:#6b7280;font-weight:400">(por venta USD${nClientes>TOP_N?` ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â de ${nClientes}`:''})</span>`;
+    tituloProv.innerHTML = `Top ${TOP_N} Proveedores <span style="font-size:12px;color:#6b7280;font-weight:400">(por compras ${monedaTopProv}${nProv>TOP_N?` ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â de ${nProv}`:''})</span>`;
     _renderTopClientes(dataOrdenada, wrapClientes);
     _renderTopProveedores(dataOrdenada, wrapProveedores);
-    // Tabla completa abajo con todas las columnas y ordenamiento dinÃƒÆ’Ã‚Â¡mico
+    // Tabla completa abajo con todas las columnas y ordenamiento dinÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡mico
     const dataFull = _ordenar(dataFiltrada, sortKey, sortDir);
     tituloTodos.textContent = `Tabla completa (${dataFull.length} registros)`;
     panelTodos.style.display = '';
     _renderTabla(dataFull, wrapTodos);
   } else {
-    // Modo catÃƒÆ’Ã‚Â¡logo: solo una tabla con el detalle del match
+    // Modo catÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡logo: solo una tabla con el detalle del match
     _renderTabla(dataOrdenada, wrapClientes);
     wrapProveedores.innerHTML = '<div class="empty">Sube Excel de compras para ver proveedores</div>';
     panelTodos.style.display = 'none';
