@@ -47,6 +47,15 @@
   .upload .info { font-size: 12px; color: #6b7280; margin-top: 8px; }
   .panel { background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
   .panel h2 { margin: 0 0 16px; font-size: 16px; }
+  .section-title { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+  .section-title-main { display:flex; flex-direction:column; gap:3px; min-width:220px; }
+  .section-title-main strong { font-size:16px; line-height:1.15; color:#0f172a; }
+  .section-title-main span { font-size:12px; color:#6b7280; font-weight:500; }
+  .title-totals { display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; }
+  .total-pill { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:linear-gradient(180deg,#f8fafc 0%,#eef2ff 100%); border:1px solid #dbe4ff; color:#475569; font-size:12px; font-weight:700; line-height:1; white-space:nowrap; box-shadow: inset 0 1px 0 rgba(255,255,255,.8); }
+  .total-pill b { color:#0f172a; font-size:13px; }
+  .total-pill.pos b { color:#059669; }
+  .total-pill.neg b { color:#dc2626; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
   th { background: #f9fafb; font-weight: 600; color: #374151; cursor: pointer; user-select: none; }
@@ -177,11 +186,11 @@
 
   <div class="grid" id="topsGrid" style="grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
     <div class="panel" style="margin:0">
-      <h2 id="tituloTopClientes">Top 25 Clientes <span style="font-size:12px;color:#6b7280;font-weight:400">(por venta USD)</span></h2>
+      <h2 id="tituloTopClientes" class="section-title"><span class="section-title-main"><strong>Top 25 Clientes</strong><span>Por venta USD</span></span></h2>
       <div id="tablaClientesWrap"><div class="empty">Sin datos</div></div>
     </div>
     <div class="panel" style="margin:0">
-      <h2 id="tituloTopProveedores">Top 25 Proveedores <span style="font-size:12px;color:#6b7280;font-weight:400">(por total pagado)</span></h2>
+      <h2 id="tituloTopProveedores" class="section-title"><span class="section-title-main"><strong>Top 25 Proveedores</strong><span>Por compras</span></span></h2>
       <div id="tablaProveedoresWrap"><div class="empty">Sin datos</div></div>
     </div>
   </div>
@@ -1262,6 +1271,50 @@ function _rankingTopProveedores(data) {
   return _ordenarTopProveedores(data.filter(r => r.tieneCompra)).map((r, idx) => ({...r, rankingProveedor: idx + 1}));
 }
 
+function _sumTopClientes(clientes) {
+  return clientes.reduce((acc, r) => {
+    acc.venta += r.venta_usd || 0;
+    acc.utilidad += r.utilidad_usd || 0;
+    return acc;
+  }, { venta: 0, utilidad: 0 });
+}
+
+function _sumTopProveedores(proveedores) {
+  return proveedores.reduce((acc, r) => {
+    acc.EUR += ((r.compras || {}).EUR || 0);
+    acc.USD += ((r.compras || {}).USD || 0);
+    return acc;
+  }, { EUR: 0, USD: 0 });
+}
+
+function _tituloTopClientesHtml(totalClientes, clientesTop) {
+  const totales = _sumTopClientes(clientesTop);
+  const alcance = totalClientes > TOP_N ? `Top ${TOP_N} de ${totalClientes} clientes con venta` : `${clientesTop.length} clientes con venta`;
+  return `
+    <span class="section-title-main">
+      <strong>Top ${TOP_N} Clientes</strong>
+      <span>${alcance}</span>
+    </span>
+    <span class="title-totals">
+      <span class="total-pill">Venta USD <b>${fmtMoneda(totales.venta, 'USD')}</b></span>
+      <span class="total-pill ${totales.utilidad < 0 ? 'neg' : 'pos'}">Utilidad USD <b>${fmtMoneda(totales.utilidad, 'USD')}</b></span>
+    </span>`;
+}
+
+function _tituloTopProveedoresHtml(totalProveedores, proveedoresTop) {
+  const totales = _sumTopProveedores(proveedoresTop);
+  const alcance = totalProveedores > TOP_N ? `Top ${TOP_N} de ${totalProveedores} proveedores con compra` : `${proveedoresTop.length} proveedores con compra`;
+  return `
+    <span class="section-title-main">
+      <strong>Top ${TOP_N} Proveedores</strong>
+      <span>${alcance}</span>
+    </span>
+    <span class="title-totals">
+      <span class="total-pill">Compras USD <b>${fmtMoneda(totales.USD, 'USD')}</b></span>
+      <span class="total-pill">Compras EUR <b>${fmtMoneda(totales.EUR, 'EUR')}</b></span>
+    </span>`;
+}
+
 // Tabla reducida Top Clientes (solo registros con venta)
 function _renderTopClientes(data, contenedor) {
   const clientes = _rankingTopClientes(data).slice(0, TOP_N);
@@ -1348,9 +1401,12 @@ function pintarTabla() {
   if (modoOps) {
     const nClientes = dataFiltrada.filter(r => r.tieneVenta).length;
     const nProv = dataFiltrada.filter(r => r.tieneCompra).length;
-    const monedaTopProv = _monedaPrincipalTopProveedores();
-    tituloCli.innerHTML = `Top ${TOP_N} Clientes <span style="font-size:12px;color:#6b7280;font-weight:400">(por venta USD${nClientes>TOP_N?` - de ${nClientes}`:''})</span>`;
-    tituloProv.innerHTML = `Top ${TOP_N} Proveedores <span style="font-size:12px;color:#6b7280;font-weight:400">(por compras ${monedaTopProv}${nProv>TOP_N?` - de ${nProv}`:''})</span>`;
+    const topClientes = _rankingTopClientes(dataOrdenada).slice(0, TOP_N);
+    const topProveedores = _rankingTopProveedores(dataOrdenada).slice(0, TOP_N);
+    tituloCli.className = 'section-title';
+    tituloProv.className = 'section-title';
+    tituloCli.innerHTML = _tituloTopClientesHtml(nClientes, topClientes);
+    tituloProv.innerHTML = _tituloTopProveedoresHtml(nProv, topProveedores);
     _renderTopClientes(dataOrdenada, wrapClientes);
     _renderTopProveedores(dataOrdenada, wrapProveedores);
     // Tabla completa abajo con todas las columnas y ordenamiento dinÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡mico
@@ -1360,6 +1416,10 @@ function pintarTabla() {
     _renderTabla(dataFull, wrapTodos);
   } else {
     // Modo catÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡logo: solo una tabla con el detalle del match
+    tituloCli.className = 'section-title';
+    tituloProv.className = 'section-title';
+    tituloCli.innerHTML = '<span class="section-title-main"><strong>Top 25 Clientes</strong><span>Sube ventas para ver el ranking</span></span>';
+    tituloProv.innerHTML = '<span class="section-title-main"><strong>Top 25 Proveedores</strong><span>Sube compras para ver el ranking</span></span>';
     _renderTabla(dataOrdenada, wrapClientes);
     wrapProveedores.innerHTML = '<div class="empty">Sube Excel de compras para ver proveedores</div>';
     panelTodos.style.display = 'none';
