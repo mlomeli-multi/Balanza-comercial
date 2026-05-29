@@ -1,273 +1,74 @@
 {
-  "actualizado": "2026-04-08",
+  "actualizado": "2026-05-29",
   "tipo": "catalogo",
   "registros": [
-    {
-      "nombre": "AGL CO., LTD."
-    },
-    {
-      "nombre": "WORLD AIR LOGISTICS CO., LTD. (BKK THAILAND) (WCA)"
-    },
-    {
-      "nombre": "PHILIPPE FAUVEDER & CIE (WCA) (FRANCIA)"
-    },
-    {
-      "nombre": "TRANSPED SHIPPING SL"
-    },
-    {
-      "nombre": "ILS CARGO TRANSPORTES INTERNACIONAIS LTDA (BRAZIL) (WCA)"
-    },
-    {
-      "nombre": "KIMEX AIR & SEA CO., LTD (WCA)(KOREA)"
-    },
-    {
-      "nombre": "MOVERS INTERNATIONAL PVT LTD (INDIA)"
-    },
-    {
-      "nombre": "SILK EXPRESS FREIGHT JAPAN LTD (WCA)(JAPON)"
-    },
-    {
-      "nombre": "BEST SERVICES INTERNATIONAL FREIGHT LTD. (WCA)(CHINA)"
-    },
-    {
-      "nombre": "ASTER LOGISTICS SRL"
-    },
-    {
-      "nombre": "CARGOMIND GMBH (AUSTRIA) (WCA)"
-    },
-    {
-      "nombre": "CARGOMIND SLOVAKIA S.R.O. (WCA)"
-    },
-    {
-      "nombre": "AIRMAX CARGO BUDAPEST ZRT  (HUNGRIA) (WCA)"
-    },
-    {
-      "nombre": "PINNACLE GLOBAL LOGISTICS COMPANY LIMITED (WCA)"
-    },
-    {
-      "nombre": "ROTRA AIR & OCEAN (BELGICA)  (WCA)"
-    },
-    {
-      "nombre": "PRIORITY FREIGHT SP. Z.O.O. (WCA) (POLONIA)"
-    },
-    {
-      "nombre": "JOIN THE MOMENT TRANSITARIOS S.A. (PORTUGAL Freixieiro) (WCA)"
-    },
-    {
-      "nombre": "NV Log SA (WCA) (GENEVA)"
-    },
-    {
-      "nombre": "CARGOMIND (POLAND) SP Z O O"
-    },
-    {
-      "nombre": "ROTRA AIR & OCEAN B.V. (NETHERLANDS)"
-    },
-    {
-      "nombre": "ZOOM CARGO S.R.O."
-    },
-    {
-      "nombre": "EASI LOGISTIC SRL"
-    },
-    {
-      "nombre": "TRINET TRANSPORTATION INC (CANADA) (WCA) (TEAM TANGO)"
-    },
-    {
-      "nombre": "ANCHOR EXPRESS, INC (WCA) (U.S.A)"
-    },
-    {
-      "nombre": "EMBASSY FREIGHT SERVICES EUROPE (GERMANY) (WCA)"
-    },
-    {
-      "nombre": "eas international (poland)"
-    },
-    {
-      "nombre": "JOIN THE MOMENT FORWARDING SL (MADRID) (WCA)"
-    },
-    {
-      "nombre": "AWOT GLOBAL LOGISTICS (KOREA) CO LTD"
-    },
-    {
-      "nombre": "CHAPMAN FREEBORN AIRCHARTERING INC"
-    },
-    {
-      "nombre": "EMBASSY FREIGHT ROTTERDAM BV"
-    },
-    {
-      "nombre": "INTER NORDIC TRANSPORT AB (WCA) (SUECIA)"
-    },
-    {
-      "nombre": "FIRMA TRANSPORTOWA \"MP TRANS\" MARCIN PITERA (MP TRANS)"
-    },
-    {
-      "nombre": "EUROFRET ITALIA SRL"
-    },
-    {
-      "nombre": "CRITICAL SOLUTIONS LTD"
-    },
-    {
-      "nombre": "BATI NAKLIYAT VE TICARET AS (WCA)"
-    },
-    {
-      "nombre": "GALAXY FREIGHT PVT LTD"
-    },
-    {
-      "nombre": "LOADING-CARGO LIMITED (WCA) (CHINA)"
-    },
-    {
-      "nombre": "CARGO COMPASS SPA"
-    },
-    {
-      "nombre": "EAS Poland SP ZOO"
-    },
-    {
-      "nombre": "JIT LOGISTIK SP Z OO SP K"
-    },
-    {
-      "nombre": "ACS TIME CRITICAL SERVICES GMBH"
-    },
-    {
-      "nombre": "APEX INTERNATIONAL INC."
-    },
-    {
-      "nombre": "MyCargoGate AG"
-    },
-    {
-      "nombre": "TEC CARGO ITALIA SRL (WCA) (Italy)"
-    },
-    {
-      "nombre": "SKYLINE EXPRESS INTERNATIONAL GMBH"
-    },
-    {
-      "nombre": "BARBARINI & FOGLIA SRL"
-    },
-    {
-      "nombre": "CRITICAL LOGISTICS GMBH (alemania)"
-    },
-    {
-      "nombre": "CARGO ONE GMBH"
-    },
-    {
-      "nombre": "JUMBO TRANSPORT AS"
-    },
-    {
-      "nombre": "PT. DGL EXPEDISI INDONESIA (DGL INDONESIA)"
-    },
-    {
-      "nombre": "KIND PORT LOGISTICS SL"
-    },
-    {
-      "nombre": "SPEDITIONSGESELLSCHAFT TECONJA MBH"
-    },
-    {
-      "nombre": "QCS-QUICK CARGO SERVICE GMBH"
-    },
-    {
-      "nombre": "TRANSPORTS INTERNATIONAUX PHILIPPE PESCHAUD"
-    },
-    {
-      "nombre": "ADRIATIC AIR CARGO SRL (WCA)"
-    },
-    {
-      "nombre": "IMEX GLOBAL FREIGHT FZC"
-    },
-    {
-      "nombre": "Wave Logistic s r o"
-    },
-    {
-      "nombre": "JCTRANS CO LTD"
-    },
-    {
-      "nombre": "JETPAK BELGIUM BV"
-    },
-    {
-      "nombre": "INTERWORLD FREIGHT SAS (COLOMBIA)"
-    },
-    {
-      "nombre": "Geis Air + Sea GmbH"
-    },
-    {
-      "nombre": "ERHARDT TRANSITARIOS SL"
-    },
-    {
-      "nombre": "H&H INTERNATIONAL LOGISTICS CO.,LTD."
-    },
-    {
-      "nombre": "LPO SOGENA"
-    },
-    {
-      "nombre": "NFO LOGISTICS CO., LTD."
-    },
-    {
-      "nombre": "LOGIQUEST LOGISTICS L.L.C."
-    },
-    {
-      "nombre": "SUNSTAR LOGISTICS USA, CORP."
-    },
-    {
-      "nombre": "PANDA GLOBAL (BEIJING) CO., LTD. GUANGZHOU BRANCH"
-    },
-    {
-      "nombre": "ALLSTATES WORLDCARGO, INC."
-    },
-    {
-      "nombre": "ESSEX FREIGHT CURACAO NV"
-    },
-    {
-      "nombre": "SUPREME FREIGHT SERVICES LIMITED"
-    },
-    {
-      "nombre": "SERVICIOS DE CARGA Y LOGISTICA LTDA"
-    },
-    {
-      "nombre": "PINHO S/A"
-    },
-    {
-      "nombre": "MYCS INTERNATIONAL TRANSPORT AND LOGISTICS"
-    },
-    {
-      "nombre": "OMEGAIR CARGO SP. Z O.O"
-    },
-    {
-      "nombre": "TIME CRITICAL LINE SRL"
-    },
-    {
-      "nombre": "SEA SKY LOGISTICS S.R.O."
-    },
-    {
-      "nombre": "MYCARGOGATE SPAIN S.L."
-    },
-    {
-      "nombre": "SHANGHAI TRUST INTERNATIONAL LOGISTICS CO.,LTD."
-    },
-    {
-      "nombre": "DEXTRANS WORLDWIDE VIETNAM CO., LTD."
-    },
-    {
-      "nombre": "3P LOGISTICS SP. Z O.O."
-    },
-    {
-      "nombre": "ITL FREIGHT MANAGEMENT JOINT STOCK COMPANY"
-    },
-    {
-      "nombre": "LOCOFREIGHT"
-    },
-    {
-      "nombre": "TIMECRITI WORLDWIDE LOGISTICS"
-    },
-    {
-      "nombre": "GUANGZHOU AIRBORNE GLOBAL LOGISTICS CO LTD"
-    },
-    {
-      "nombre": "TIME:MATTERS AMERICAS, INC."
-    },
-    {
-      "nombre": "NINGBO CTS INTERNATIONAL LOGISTICS CO.,LTD (WCA) (NINGBO)"
-    },
-    {
-      "nombre": "TIMECRTI WORLDWIDE LOGISTICS"
-    },
-    {
-      "nombre": "YQN TRIMAN LOGISTICS CO LTD"
-    }
+    { "nombre": "3P LOGISTICS SP. Z O.O." },
+    { "nombre": "AIR SEA TRUCK INTL GMBH (AST)" },
+    { "nombre": "AIRMAX CARGO BUDAPEST" },
+    { "nombre": "ANCHOR EXPRESS" },
+    { "nombre": "APEX INTERNATIONAL INC." },
+    { "nombre": "AWOT GLOBAL LOGISTICS (KOREA) CO LTD" },
+    { "nombre": "BATI NAKLIYAT VE TICARET AS (WCA)" },
+    { "nombre": "CARGO COMPASS SPA" },
+    { "nombre": "CARGO MOVERS GMBH" },
+    { "nombre": "CARGOMIND" },
+    { "nombre": "CRITICAL LOGISTICS GMBH (alemania)" },
+    { "nombre": "CRITICAL SOLUTIONS LTD" },
+    { "nombre": "DART GLOBAL LOGISTICS PVT LTD (INDIA) (WCA)" },
+    { "nombre": "DART GLOBAL LOGISTICS VIETNAM COMPANY CO LTD" },
+    { "nombre": "DC LOGISTICS BRASIL LTDA" },
+    { "nombre": "DONGJIN GLOBAL LOGISTICS INC" },
+    { "nombre": "EAS INTERNATIONAL" },
+    { "nombre": "EASI LOGISTIC SRL" },
+    { "nombre": "EES FREIGHT SERVICES PTE LTD" },
+    { "nombre": "EMBASSY FREIGHT ROTTERDAM BV" },
+    { "nombre": "EMBASSY FREIGHT SERVICES (WCA) (UK)" },
+    { "nombre": "EMBASSY FREIGHT SERVICES EUROPE (GERMANY) (WCA)" },
+    { "nombre": "Emergency Parts Logistics Inc. (CANADA) (WCA)" },
+    { "nombre": "EUROFRET ITALIA SRL" },
+    { "nombre": "GALAXY FREIGHT PVT LTD" },
+    { "nombre": "Geis Air + Sea GmbH" },
+    { "nombre": "GUANGZHOU AIRBORNE GLOBAL LOGISTICS CO LTD" },
+    { "nombre": "GUVENLI LOJISTIK VE NAK TIC LTD STI" },
+    { "nombre": "ILS CARGO TRANSPORTES INTERNACIONAIS LTDA (BRAZIL) (WCA)" },
+    { "nombre": "INTER NORDIC TRANSPORT AB (WCA) (SUECIA)" },
+    { "nombre": "ITAW CARGO SAC (WCA) (PERU)" },
+    { "nombre": "JETPAK BELGIUM BV" },
+    { "nombre": "JIT LOGISTIK SP Z OO SP K" },
+    { "nombre": "JOIN THE MOMENT TRANSITARIOS S.A. (PORTUGAL Freixieiro) (WCA)" },
+    { "nombre": "KIMEX AIR & SEA CO., LTD (WCA)(KOREA)" },
+    { "nombre": "LOADING-CARGO LIMITED (WCA) (CHINA)" },
+    { "nombre": "LOXSON INTERNATIONAL LOGISTICS" },
+    { "nombre": "MASTER CARGO (INTERNATIONAL) CO.,LTD" },
+    { "nombre": "MOVERS INTERNATIONAL PVT LTD (INDIA)" },
+    { "nombre": "MS GLOBAL FREIGHT SOLUTION SDN BHD" },
+    { "nombre": "NINGBO CTS INTERNATIONAL LOGISTICS CO.,LTD (WCA) (NINGBO)" },
+    { "nombre": "NV Log SA (WCA) (GENEVA)" },
+    { "nombre": "OMEGAIR CARGO SP. Z O.O" },
+    { "nombre": "OPTEC EXPRESS" },
+    { "nombre": "PINHO S/A" },
+    { "nombre": "PRIORITY FREIGHT" },
+    { "nombre": "ROTRA AIR & OCEAN (BELGICA)  (WCA)" },
+    { "nombre": "RUWA SPED AG" },
+    { "nombre": "SEA SKY LOGISTICS S.R.O." },
+    { "nombre": "SHANGHAI TRUST INTERNATIONAL LOGISTICS CO.,LTD." },
+    { "nombre": "SHENZHEN OKAY LOGISTICS CO.LTD." },
+    { "nombre": "SIFA LOGISTICS" },
+    { "nombre": "SILK EXPRESS FREIGHT JAPAN LTD (WCA)(JAPON)" },
+    { "nombre": "SKY GLOBAL LOGISTICS SERVICES PTE LTD" },
+    { "nombre": "SKYLINE EXPRESS INTERNATIONAL GMBH" },
+    { "nombre": "SKYWAYS AIR SERVICES" },
+    { "nombre": "SPEDITIONSGESELLSCHAFT TECONJA MBH" },
+    { "nombre": "SUNTRANS" },
+    { "nombre": "TEC CARGO ITALIA SRL (WCA) (Italy)" },
+    { "nombre": "TIME MATTERS" },
+    { "nombre": "TIMECRITI WORLDWIDE LOGISTICS" },
+    { "nombre": "TOTALPLAN PORTO-PLANEAMENTO DE CARGA E LOGISTICA (WCA)(PORTUGAL)" },
+    { "nombre": "Wave Logistic s r o" },
+    { "nombre": "WE LINK WORLD CONSULTANCY SL" },
+    { "nombre": "WIN TRANSPORT ITALY SRL" },
+    { "nombre": "WORLD AIR LOGISTICS CO., LTD. (BKK THAILAND) (WCA)" },
+    { "nombre": "YQN INTERNATIONAL LOGISTICS" },
+    { "nombre": "ZOOM CARGO S.R.O." }
   ]
 }

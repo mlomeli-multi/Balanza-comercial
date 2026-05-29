@@ -1,303 +1,63 @@
 {
-  "actualizado": "2026-04-07",
+  "actualizado": "2026-05-29",
   "tipo": "catalogo",
   "registros": [
-    {
-      "nombre": "ACTION AGENCIAMENTO DE CARGAS LTDA"
-    },
-    {
-      "nombre": "ADUAMERICA CARGA SA"
-    },
-    {
-      "nombre": "AIO (Shanghai) International Cargo Co. Ltd."
-    },
-    {
-      "nombre": "AIRGROUP"
-    },
-    {
-      "nombre": "AIRMAX CARGO BUDAPEST ZRT"
-    },
-    {
-      "nombre": "AIRON TASIMACILIK VE LOJISTIK ANONIM SIRKETI"
-    },
-    {
-      "nombre": "AIRSOAR LOGISTICS LTD"
-    },
-    {
-      "nombre": "ALX"
-    },
-    {
-      "nombre": "AMG Cargo Logistics Sp. z o.o."
-    },
-    {
-      "nombre": "AMR INDUSTRY"
-    },
-    {
-      "nombre": "ANCHOR EXPRESS INC"
-    },
-    {
-      "nombre": "ARCH GLOBAL LOGISTICS"
-    },
-    {
-      "nombre": "ATE LOGISTICS CO. LTD."
-    },
-    {
-      "nombre": "AZ VALVES DE MEXICO S.A. DE C.V. (TRADEWORKS)"
-    },
-    {
-      "nombre": "BAJIKA KARGO"
-    },
-    {
-      "nombre": "BARSAN GLOBAL LOGISTIC MÉXICO SA DE CV"
-    },
-    {
-      "nombre": "BEST SERVICES INTERNATIONAL FREIGHT LTD. (SHENZHEN HEAD OFFICE)"
-    },
-    {
-      "nombre": "Blackstone Shipping netherlands bv"
-    },
-    {
-      "nombre": "BUNKER 369 S.A. DE C.V (s gROUP cHINA lOGISTICS)"
-    },
-    {
-      "nombre": "CARGO BOOKING LOGISTICS LTDA"
-    },
-    {
-      "nombre": "CARGOMIND"
-    },
-    {
-      "nombre": "CBX GLOBAL(SHENZHEN)CO.LTD."
-    },
-    {
-      "nombre": "Debeaux transit"
-    },
-    {
-      "nombre": "Door To Door Export Kft"
-    },
-    {
-      "nombre": "DRAFT LOJISTIK VE DIS TICARET A.S."
-    },
-    {
-      "nombre": "EAS INTERNATIONAL"
-    },
-    {
-      "nombre": "Eusu Logistics"
-    },
-    {
-      "nombre": "EVOLUTION TIME CRITICAL"
-    },
-    {
-      "nombre": "EXPRESS WORLD GROUP"
-    },
-    {
-      "nombre": "Faurecia Sistemas Automotrices de Mexico. S.A. de C.V. (REDLINE)"
-    },
-    {
-      "nombre": "GALAXY FREIGHT PVT. LTD."
-    },
-    {
-      "nombre": "gEMLOG company limited"
-    },
-    {
-      "nombre": "GENTHERM MONTERREY"
-    },
-    {
-      "nombre": "Global lineR agencies"
-    },
-    {
-      "nombre": "GLOBAL SHIPPING SERVICES LLC"
-    },
-    {
-      "nombre": "GORGEOUS OCEAN INTERNATIONAL LOGISTICS CO. LTD."
-    },
-    {
-      "nombre": "GREENTURN GLOBAL LOGISTICS PRIVATE LIMITED"
-    },
-    {
-      "nombre": "HOROZ LOJISTIK KARGO HIZMETLERI VE TIC.A.S"
-    },
-    {
-      "nombre": "HSM GLOBAL LTD"
-    },
-    {
-      "nombre": "JS LOGISTICS CO.LTD"
-    },
-    {
-      "nombre": "KALASH GLOBAL LOGISTICS PVT LTD"
-    },
-    {
-      "nombre": "KALTMANN S.A DE C.V"
-    },
-    {
-      "nombre": "Lift Freight Services"
-    },
-    {
-      "nombre": "LOG COSMOS"
-    },
-    {
-      "nombre": "Logcosmos Supply Chain (Suzhou) Co.Ltd"
-    },
-    {
-      "nombre": "LOXSON INTERNATIONAL LOGISTICS"
-    },
-    {
-      "nombre": "LOYAL CARGO SERVICES B.V"
-    },
-    {
-      "nombre": "LXT LOGISTIC&TRADING(GUANGZHOU)CO.LTD"
-    },
-    {
-      "nombre": "MAGIC TRANSPORT INC"
-    },
-    {
-      "nombre": "MARITIMEX - FZCO"
-    },
-    {
-      "nombre": "MASTERSUL COMEX"
-    },
-    {
-      "nombre": "MATRAS"
-    },
-    {
-      "nombre": "MULTI MODAL OVERSEAS PVT LTD"
-    },
-    {
-      "nombre": "Neo Air Charter GmbH"
-    },
-    {
-      "nombre": "NS GLOBAL LOJISTIK HIZMETLERI SAN TIC LTD"
-    },
-    {
-      "nombre": "optec express inc"
-    },
-    {
-      "nombre": "Oy Hacklin Logistics Ltd"
-    },
-    {
-      "nombre": "PANAMA COLD AGENCY"
-    },
-    {
-      "nombre": "Paradigm Cargo"
-    },
-    {
-      "nombre": "Penta freight pvt ltd"
-    },
-    {
-      "nombre": "PINHO S/A"
-    },
-    {
-      "nombre": "PINNACLE GLOBAL LOGISTICS CO.LTD."
-    },
-    {
-      "nombre": "PRIORITY FREIGHT"
-    },
-    {
-      "nombre": "PRODUCTOS EXITOSOS S.A. DE C.V. (S GROUP)"
-    },
-    {
-      "nombre": "QINGDAO GUOYUAN INTERNATIONAL LOGISTIC CO. LTD"
-    },
-    {
-      "nombre": "QUALITAIR & SEA"
-    },
-    {
-      "nombre": "QUICK (k&N)"
-    },
-    {
-      "nombre": "Real logistics sp. z.o.o sp k."
-    },
-    {
-      "nombre": "REDLINE INTERN SPEDITION"
-    },
-    {
-      "nombre": "Ryders Customs & Forwarding Ltd"
-    },
-    {
-      "nombre": "S GROUP CHINA LOGISTICS"
-    },
-    {
-      "nombre": "Saturn Freight Systems Inc."
-    },
-    {
-      "nombre": "SCHAEFFLER TRANSMISSION S. DE. R.L DE C.V (REDLINE)"
-    },
-    {
-      "nombre": "SCHNEIDER"
-    },
-    {
-      "nombre": "SEABRIDGE TRANSPORT GMBH"
-    },
-    {
-      "nombre": "SHANGHAI YIHENG CARGO SERVICE.CO.LTD"
-    },
-    {
-      "nombre": "SHARE LOGISTICS"
-    },
-    {
-      "nombre": "SHARE LOGISTICS INC."
-    },
-    {
-      "nombre": "SINOTRANS CHANGJIANG CO. LTD. OVERSEAS BUSINESS DIVISION"
-    },
-    {
-      "nombre": "SINTRA SPA"
-    },
-    {
-      "nombre": "SKY INTERNATIONAL LOGISTICS"
-    },
-    {
-      "nombre": "Sky Net Logistics USA LLC"
-    },
-    {
-      "nombre": "Speditionsgesellschaft TECONJA mbH"
-    },
-    {
-      "nombre": "STARMARK INTERNATIONAL LINE LTD."
-    },
-    {
-      "nombre": "Sun trans"
-    },
-    {
-      "nombre": "Team Freight Forwarding"
-    },
-    {
-      "nombre": "TIME MATTERS"
-    },
-    {
-      "nombre": "timecriti worldwide logistics"
-    },
-    {
-      "nombre": "TORRESTIR - TRANSITÁRIOS LDA"
-    },
-    {
-      "nombre": "TRADEWORKS"
-    },
-    {
-      "nombre": "UNIEXPRESS LTD"
-    },
-    {
-      "nombre": "UUL Global US LLC"
-    },
-    {
-      "nombre": "VERSANT"
-    },
-    {
-      "nombre": "WORLD CARGO SRL"
-    },
-    {
-      "nombre": "WORLD PACK EXPRESS S.L"
-    },
-    {
-      "nombre": "WORLDWIDE FREIGHT LOGISTICS LIMITED - T/A ZENCARGO"
-    },
-    {
-      "nombre": "YATARI EXPRESS CO. LTD"
-    },
-    {
-      "nombre": "YQN INTERNATIONAL LOGISTICS"
-    },
-    {
-      "nombre": "ZUFALL"
-    }
+    { "nombre": "QUICK (k&N)" },
+    { "nombre": "BARSAN GLOBAL LOGISTIC MEXICO SA DE CV" },
+    { "nombre": "WORLD CARGO SRL" },
+    { "nombre": "VERSANT" },
+    { "nombre": "LOXSON INTERNATIONAL LOGISTICS" },
+    { "nombre": "DT PROJECT" },
+    { "nombre": "TIME MATTERS" },
+    { "nombre": "Global lineR agencies" },
+    { "nombre": "ANCHOR EXPRESS" },
+    { "nombre": "NS GLOBAL LOJISTIK HIZMETLERI SAN TIC LTD" },
+    { "nombre": "gEMLOG company limited" },
+    { "nombre": "SHANGHAI YIHENG CARGO SERVICE.CO.LTD" },
+    { "nombre": "Eusu Logistics" },
+    { "nombre": "BEST SERVICES INTERNATIONAL FREIGHT" },
+    { "nombre": "PRIORITY FREIGHT" },
+    { "nombre": "EAS INTERNATIONAL" },
+    { "nombre": "SEABRIDGE TRANSPORT GMBH" },
+    { "nombre": "WORLDWIDE FREIGHT LOGISTICS LIMITED - T/A ZENCARGO" },
+    { "nombre": "UNIEXPRESS LTD" },
+    { "nombre": "SINTRA SPA" },
+    { "nombre": "QINGDAO GUOYUAN INTERNATIONAL LOGISTIC CO. LTD" },
+    { "nombre": "SCHNEIDER" },
+    { "nombre": "PANAMA COLD AGENCY" },
+    { "nombre": "CBX GLOBAL(SHENZHEN)CO.LTD." },
+    { "nombre": "Real logistics sp. z.o.o sp k." },
+    { "nombre": "BTG INTERNATIONALE SPEDITITION GMBH" },
+    { "nombre": "YATARI EXPRESS CO. LTD" },
+    { "nombre": "HSM GLOBAL LTD" },
+    { "nombre": "AIO (Shanghai) International Cargo Co. Ltd." },
+    { "nombre": "TORRESTIR - TRANSITARIOS LDA" },
+    { "nombre": "MATRAS" },
+    { "nombre": "SKYWAYS AIR SERVICES" },
+    { "nombre": "ATE LOGISTICS CO. LTD." },
+    { "nombre": "SHARE LOGISTICS INC." },
+    { "nombre": "Team Freight Forwarding" },
+    { "nombre": "LKC LOGISTICS PRIVATE LIMITED" },
+    { "nombre": "LXT LOGISTIC&TRADING(GUANGZHOU)CO.LTD" },
+    { "nombre": "SKY INTERNATIONAL LOGISTICS" },
+    { "nombre": "YQN INTERNATIONAL LOGISTICS" },
+    { "nombre": "KALASH GLOBAL LOGISTICS PVT LTD" },
+    { "nombre": "TIMECRITI WORLDWIDE LOGISTICS" },
+    { "nombre": "MAGIC TRANSPORT INC" },
+    { "nombre": "OPTEC EXPRESS" },
+    { "nombre": "AMG Cargo Logistics Sp. z o.o." },
+    { "nombre": "AIRMAX CARGO BUDAPEST" },
+    { "nombre": "S GROUP CHINA LOGISTICS" },
+    { "nombre": "BAND SUPPLY CHAIN LOGISTICS CO.LTD." },
+    { "nombre": "TOP SHIPPING VIETNAM JSC" },
+    { "nombre": "TRADEWORKS" },
+    { "nombre": "REDLINE INTERN SPEDITION" },
+    { "nombre": "LUSO ATLANTIC LDA" },
+    { "nombre": "Logcosmos Supply Chain (Suzhou) Co.Ltd" },
+    { "nombre": "AIRSOAR LOGISTICS LTD" },
+    { "nombre": "SUNTRANS" },
+    { "nombre": "MASTERSUL COMEX" },
+    { "nombre": "YEDITEPE TASIMACILIK A.S" },
+    { "nombre": "MANUPORT LOGISTICS" }
   ]
 }

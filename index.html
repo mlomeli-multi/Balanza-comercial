@@ -286,24 +286,43 @@ const norm = s => (s||'').toString().trim().toUpperCase().replace(/[.,]/g,'').re
 // NormalizaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n agresiva: quita acentos, parÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©ntesis, puntuaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n y sufijos de empresa
 const STOPWORDS = new Set(['LTD','LTDA','LIMITED','INC','GMBH','SA','SAS','SRL','LLC','CO','CORP','COMPANY','PVT','SPA','BV','AG','KG','AB','AS','OY','SL','DE','CV','SP','ZRT','KFT','FZC','FZCO','FZE','NV','S','R','L','Z','O','THE','AND','OF','VE','TIC','TICARET','LDA','SAN','SRO','RL']);
 // Aliases para corregir typos / variantes conocidas (token -> token canÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³nico)
-const TOKEN_ALIASES = {'TIMECRTI':'TIMECRITI'};
+const TOKEN_ALIASES = {'TIMECRTI':'TIMECRITI','LOGISTCS':'LOGISTICS'};
 const NORMALIZED_ALIASES = {
   'TIME MATTERS AMERICAS': 'TIME MATTERS',
   'TIME MATTERS AMERICAS INC': 'TIME MATTERS',
+  'TIME MATTERS': 'TIME MATTERS',
   'ANCHOR EXPRESS': 'ANCHOR EXPRESS',
+  'ANCHOR EXPRESS INC': 'ANCHOR EXPRESS',
   'BEST SERVICES INTERNATIONAL FREIGHT': 'BEST SERVICES INTERNATIONAL FREIGHT',
   'BEST SERVICES INTERNATIONAL FREIGHT SHENZHEN HEAD OFFICE': 'BEST SERVICES INTERNATIONAL FREIGHT',
   'EAS INTERNATIONAL POLAND': 'EAS INTERNATIONAL',
   'EAS POLAND ZOO': 'EAS INTERNATIONAL',
+  'EAS INTERNATIONAL': 'EAS INTERNATIONAL',
+  'SKYWAYS AIR SERVICES PRIVATE INDIA': 'SKYWAYS AIR SERVICES',
+  'SKYWAYS AIR SERVICES': 'SKYWAYS AIR SERVICES',
   'AIRMAX CARGO BUDAPEST HUNGRIA': 'AIRMAX CARGO BUDAPEST',
+  'AIRMAX CARGO BUDAPEST': 'AIRMAX CARGO BUDAPEST',
   'PINNACLE GLOBAL LOGISTICS': 'PINNACLE GLOBAL LOGISTICS',
+  'LOXSON INTERNATIONAL LOGISTICS': 'LOXSON INTERNATIONAL LOGISTICS',
   'CARGOMIND POLAND': 'CARGOMIND',
   'CARGOMIND SLOVAKIA': 'CARGOMIND',
+  'CARGOMIND': 'CARGOMIND',
+  'OPTEC EXPRESS HK': 'OPTEC EXPRESS',
+  'OPTEC EXPRESS': 'OPTEC EXPRESS',
   'PRIORITY FREIGHT EUROPE ALEMANIA': 'PRIORITY FREIGHT',
+  'PRIORITY FREIGHT EUROPE': 'PRIORITY FREIGHT',
   'PRIORITY FREIGHT LHR': 'PRIORITY FREIGHT',
   'PRIORITY FREIGHT ESPANA': 'PRIORITY FREIGHT',
   'PRIORITY FREIGHT POLONIA': 'PRIORITY FREIGHT',
-  'PRIORITY FREIGHT': 'PRIORITY FREIGHT'
+  'PRIORITY FREIGHT': 'PRIORITY FREIGHT',
+  'SUN TRANS': 'SUNTRANS',
+  'SUNTRANS LOGISTICA BRASIL': 'SUNTRANS',
+  'SUNTRANS': 'SUNTRANS',
+  'TIMECRITI WORLDWIDE LOGISTICS': 'TIMECRITI WORLDWIDE LOGISTICS',
+  'YQN TRIMAN LOGISTICS': 'YQN INTERNATIONAL LOGISTICS',
+  'YQN INTERNATIONAL LOGISTICS': 'YQN INTERNATIONAL LOGISTICS',
+  'AZ VALVES MEXICO TRADEWORKS': 'TRADEWORKS',
+  'TRADEWORKS': 'TRADEWORKS'
 };
 function tokenizeCore(s) {
   let x = (s||'').toString().toUpperCase();
