@@ -86,6 +86,17 @@
   .help { background: #eff6ff; border-left: 4px solid #2563eb; padding: 12px 16px; border-radius: 4px; font-size: 13px; margin-bottom: 16px; }
   @media (max-width: 1100px) { #topsGrid, .header-tools { grid-template-columns: 1fr 1fr !important; } .header-copy { grid-template-columns: 1fr; align-items:flex-start; flex-direction:column; } }
   @media (max-width: 800px) { .uploads, .charts, .header-tools { grid-template-columns: 1fr; } main { padding: 16px; } header { padding: 16px; } .header-upload-head { align-items:flex-start; flex-direction:column; } .upload-trigger { width:100%; } .header-copy h1 { font-size:24px; } }
+  .tab-bar { display:flex; gap:0; background:#e5e7eb; border-radius:10px; padding:3px; max-width:380px; margin:0 auto 0 0; }
+  .tab-btn { flex:1; padding:9px 20px; border:0; background:transparent; color:#6b7280; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer; transition:all .15s; white-space:nowrap; }
+  .tab-btn.active { background:#fff; color:#1f2937; box-shadow:0 1px 3px rgba(0,0,0,.12); }
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+  .mercados-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
+  .country-bar { height:8px; border-radius:4px; background:#e5e7eb; overflow:hidden; min-width:60px; }
+  .country-bar-fill { height:100%; border-radius:4px; }
+  .pais-positive { color:#059669; font-weight:600; }
+  .pais-negative { color:#dc2626; font-weight:600; }
+  @media (max-width:900px) { .mercados-grid { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -148,6 +159,13 @@
   </div>
 </header>
 <main>
+  <div style="margin-bottom:18px">
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+      <button class="tab-btn" data-tab="mercados">Mercados</button>
+    </div>
+  </div>
+  <div id="tab-dashboard" class="tab-panel active">
   <div id="estadoCarga" class="help" style="display:none">Cargando...</div>
 
   <div class="grid cards" id="kpisWrap">
@@ -198,6 +216,30 @@
     <h2 id="tituloTodos">Tabla completa (todos los registros)</h2>
     <div id="tablaTodosWrap"></div>
   </div>
+  </div><!-- /tab-dashboard -->
+
+  <div id="tab-mercados" class="tab-panel">
+    <div class="panel">
+      <h2>Resumen por Mercado</h2>
+      <p style="font-size:13px;color:#6b7280;margin:0 0 12px">Compras y ventas agrupadas por pais de origen del agente. Balance = Venta - Compra USD.</p>
+      <div id="mercadosResumenWrap"><div class="empty">Sube ventas y/o compras para ver mercados</div></div>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <h2>Balance por Mercado</h2>
+      <p style="font-size:13px;color:#6b7280;margin:0 0 12px">Paises donde ganas vs donde gastas mas. Verde = mas venta que compra.</p>
+      <div style="max-width:800px"><canvas id="chartBalance"></canvas></div>
+    </div>
+    <div class="mercados-grid" style="margin-top:16px">
+      <div class="panel" style="margin:0">
+        <h2>Proveedores por Mercado</h2>
+        <div id="mercadosProvWrap"><div class="empty">Sin datos</div></div>
+      </div>
+      <div class="panel" style="margin:0">
+        <h2>Clientes por Mercado</h2>
+        <div id="mercadosCliWrap"><div class="empty">Sin datos</div></div>
+      </div>
+    </div>
+  </div><!-- /tab-mercados -->
 </main>
 
 <script>
@@ -325,6 +367,87 @@ const NORMALIZED_ALIASES = {
   'GROUP CHINA LOGISTICS': 'S GROUP CHINA LOGISTICS',
   'AZ VALVES MEXICO TRADEWORKS': 'TRADEWORKS',
   'TRADEWORKS': 'TRADEWORKS'
+};
+const COUNTRY_MAP = {
+  '1UP CARGO':'Canada','3P LOGISTICS':'Polonia','ACS LOGISTICS':'Austria',
+  'ACS TIME CRITICAL SERVICES':'Alemania','AGL':'Corea del Sur',
+  'AIO SHANGHAI INTERNATIONAL CARGO':'China','AIRMAX CARGO BUDAPEST':'Hungria',
+  'AIRSOAR LOGISTICS':'China','ALLSTATES WORLDCARGO':'Estados Unidos',
+  'ANCHOR EXPRESS':'Estados Unidos','APEX INTERNATIONAL':'Japon',
+  'ASTER LOGISTICS':'Italia','ATE LOGISTICS':'China',
+  'AWOT GLOBAL CORPORATION':'China','AWOT GLOBAL LOGISTICS':'Corea del Sur',
+  'AXIS SHIPPING AGENC CARGAS':'Brasil','BALANCED SOLUTIONS':'Sudafrica',
+  'BAND SUPPLY CHAIN LOGISTICS':'China','BARSAN GLOBAL LOGISTIC MEXICO':'Mexico',
+  'BATI NAKLIYAT':'Turquia','BERRIO LOGISTICS INDIA':'India',
+  'BEST SERVICES INTERNATIONAL FREIGHT':'China','BOTT LOGISTICS':'Hong Kong',
+  'CARGO COMPASS':'Italia','CARGO MOVERS':'Alemania','CARGO ONE':'Alemania',
+  'CARGOMIND':'Austria','CHAPMAN FREEBORN AIRCHARTERING':'Estados Unidos',
+  'CRITICAL LOGISTICS':'Alemania','CRITICAL SOLUTIONS':'Hong Kong',
+  'DART GLOBAL LOGISTICS':'India','DART GLOBAL LOGISTICS VIETNAM':'Vietnam',
+  'DC LOGISTICS BRASIL':'Brasil','DEXTRANS WORLDWIDE VIETNAM':'Vietnam',
+  'DONGJIN GLOBAL LOGISTICS':'Corea del Sur','DOOR TO DOOR EXPRESS':'Hungria',
+  'DT PROJECT':'Francia','EAS INTERNATIONAL':'Polonia','EASI LOGISTIC':'Rumania',
+  'EES FREIGHT SERVICES PTE':'Singapur','EMBASSY FREIGHT ROTTERDAM':'Paises Bajos',
+  'EMBASSY FREIGHT SERVICES':'Reino Unido','EMBASSY FREIGHT SERVICES EUROPE':'Alemania',
+  'EMERGENCY PARTS LOGISTICS':'Canada','ERHARDT TRANSITARIOS':'Espana',
+  'ESSEX FREIGHT CURACAO':'Curacao','EURO EXIM SERVICES PRIVATE':'India',
+  'EUROFRET ITALIA':'Italia','EUSU LOGISTICS':'China',
+  'EVER LOGISTICS INT FORWARDING':'Hong Kong','EVEREST INTERNATIONAL LOGISTICS':'China',
+  'EXCEL CARGO SERVICES DBA CBX GLOBAL':'Estados Unidos','FD TRANSPORTATION':'Alemania',
+  'FEI CARGO':'India','FIRMA TRANSPORTOWA MP TRANS MARCIN PITERA':'Polonia',
+  'GALAXY FREIGHT':'India','GEIS AIR SEA':'Alemania','GEMLOG':'China',
+  'GLOBAL LINER AGENCIES':'India','GRAND FORWARDING':'Taiwan',
+  'GUANGZHOU AIRBORNE GLOBAL LOGISTICS':'China','GUVENLI LOJISTIK NAK STI':'Turquia',
+  'HEMISPHERE FREIGHT SERVICES':'Reino Unido','HONOUR LANE SHIPPING':'Hong Kong',
+  'HSM GLOBAL':'China','ILS CARGO TRANSPORTES INTERNACIONAIS':'Brasil',
+  'IMEX GLOBAL FREIGHT':'Emiratos Arabes','INTER NORDIC TRANSPORT':'Suecia',
+  'INTERWORLD FREIGHT':'Colombia','ITAW CARGO SAC':'Peru',
+  'ITL FREIGHT MANAGEMENT JOINT STOCK':'Vietnam','JCTRANS':'China',
+  'JDM WORLDWIDE FREIGHT SOLUTIONS':'India','JETPAK BELGIUM':'Belgica',
+  'JIT LOGISTIK OO K':'Polonia','JOIN MOMENT FORWARDING':'Espana',
+  'JOIN MOMENT TRANSITARIOS A':'Portugal','JUMBO TRANSPORT':'Dinamarca',
+  'KALASH GLOBAL LOGISTICS':'India','KIMEX AIR SEA':'Corea del Sur',
+  'LKC LOGISTICS PRIVATE':'India','LOADING CARGO':'China','LOCOFREIGHT':'Marruecos',
+  'LOGCOSMOS SUPPLY CHAIN SUZHOU':'China','LOGIQUEST LOGISTICS C':'Emiratos Arabes',
+  'LONGSAIL SUPPLY CHAIN':'China','LOXSON INTERNATIONAL LOGISTICS':'China',
+  'LUSO ATLANTIC':'Portugal','MAGIC TRANSPORT':'Estados Unidos',
+  'MANUPORT LOGISTICS':'Belgica','MASTER CARGO':'China','MASTERSUL COMEX':'Brasil',
+  'MATRAS':'Italia','MOTION SUPPLY CHAIN FRANCE':'Francia',
+  'MOVERS INTERNATIONAL':'India','MS GLOBAL FREIGHT SOLUTION SDN BHD':'Malasia',
+  'MYCARGOGATE':'Suiza','MYCS INTERNATIONAL TRANSPORT LOGISTICS':'Marruecos',
+  'NFO LOGISTICS':'Tailandia','NINGBO CTS INTERNATIONAL LOGISTICS':'China',
+  'NORTON LILLY INTERNATIONAL A':'Panama','NS GLOBAL LOJISTIK HIZMETLERI':'Turquia',
+  'OMEGAIR CARGO':'Polonia','OPTEC EXPRESS':'China',
+  'PANDA GLOBAL GUANGZHOU BRANCH':'China','PINHO A':'Brasil',
+  'PINNACLE GLOBAL LOGISTICS':'China','PRIORITY FREIGHT':'Alemania',
+  'PT DGL EXPEDISI INDONESIA':'Indonesia','QCS QUICK CARGO SERVICE':'Alemania',
+  'QINGDAO GUOYUAN INTERNATIONAL LOGISTIC':'China','QUICK K N':'Reino Unido',
+  'REDLINE INTERN SPEDITION':'Alemania','ROTRA AIR OCEAN':'Belgica',
+  'RUWA SPED':'Suiza','S GROUP CHINA LOGISTICS':'China','SBA CARGO':'Chipre',
+  'SCHNEIDER':'Estados Unidos','SDL EMERGENCY LOGISTICS':'Rumania',
+  'SEA SKY LOGISTICS':'Eslovaquia','SEABRIDGE TRANSPORT':'Alemania',
+  'SERVICIOS CARGA Y LOGISTICA':'Chile','SHANGHAI EVEREST INT LOGISTICS':'China',
+  'SHANGHAI TRUST INTERNATIONAL LOGISTICS':'China',
+  'SHANGHAI YIHENG CARGO SERVICE':'China','SHARE LOGISTICS':'Paises Bajos',
+  'SHARE LOGISTICS AIR OCEAN B V':'Paises Bajos','SHENZHEN OKAY LOGISTICS':'China',
+  'SIFA LOGISTICS':'Francia','SILK EXPRESS FREIGHT JAPAN':'Japon',
+  'SINTRA':'Italia','SKY GLOBAL LOGISTICS SERVICES PTE':'Singapur',
+  'SKY INTERNATIONAL LOGISTICS':'China','SKYWAYS AIR SERVICES':'India',
+  'SKYWAYS SLS LOGISTIK':'Tailandia','SPEDITIONSGESELLSCHAFT TECONJA MBH':'Alemania',
+  'SUNSTAR LOGISTICS USA':'Estados Unidos','SUNTRANS':'Brasil',
+  'SUPER CARGO SERVICES':'Vietnam','SUPREME FREIGHT SERVICES':'Reino Unido',
+  'TEAM FREIGHT FORWARDING':'India','TEC CARGO ITALIA':'Italia',
+  'TIME CRITICAL LINE':'Rumania','TIME MATTERS':'Estados Unidos',
+  'TIMECRITI WORLDWIDE LOGISTICS':'China','TORRESTIR TRANSITARIOS':'Portugal',
+  'TOTALPLAN PORTO PLANEAMENTO CARGA E LOGISTICA':'Portugal','TRADEWORKS':'Mexico',
+  'TRANSPED SHIPPING':'Espana','TRANSPORTS INTERNATIONAUX PHILIPPE PESCHAUD':'Marruecos',
+  'TRINET TRANSPORTATION':'Canada','UNIEXPRESS':'Polonia','VERSANT':'Estados Unidos',
+  'WAVE LOGISTIC':'Chequia','WIN TRANSPORT ITALY':'Italia',
+  'WORLD AIR LOGISTICS':'Tailandia','WORLD CARGO':'Italia',
+  'WORLDWIDE FREIGHT LOGISTICS ZENCARGO':'Reino Unido',
+  'YATARI EXPRESS':'Japon','YEDITEPE TASIMACILIK':'Turquia',
+  'NV LOG':'Suiza','ADRIATIC AIR CARGO':'Italia','APS EXPRESS':'Tailandia',
+  'BARBARINI FOGLIA':'Italia','REGENCY FREIGHT SERVICES':'Reino Unido',
 };
 function tokenizeCore(s) {
   let x = (s||'').toString().toUpperCase();
@@ -1457,6 +1580,115 @@ function pintarTabla() {
 
 document.getElementById('search').addEventListener('input', pintarTabla);
 document.getElementById('filtro').addEventListener('change', pintarTabla);
+// ==== TABS ====
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'mercados') pintarMercados();
+  });
+});
+
+// ==== MERCADOS ====
+let chartBalance = null;
+function getPais(key) { return COUNTRY_MAP[key] || null; }
+
+function pintarMercados() {
+  if (!modoOps) return;
+  const paisData = {};
+  const provPorPais = {};
+  const cliPorPais = {};
+
+  if (opsCompras && opsCompras.registros) {
+    for (const [key, r] of Object.entries(opsCompras.registros)) {
+      const pais = getPais(key) || 'Sin pais';
+      if (!paisData[pais]) paisData[pais] = {compraUsd:0,compraEur:0,venta:0,utilidad:0,provs:0,clis:0};
+      paisData[pais].compraUsd += (r.compras||{}).USD || 0;
+      paisData[pais].compraEur += (r.compras||{}).EUR || 0;
+      paisData[pais].provs++;
+      if (!provPorPais[pais]) provPorPais[pais] = [];
+      provPorPais[pais].push({nombre:r.nombre, usd:(r.compras||{}).USD||0, eur:(r.compras||{}).EUR||0, emb:r.embarques});
+    }
+  }
+  if (opsVentas && opsVentas.registros) {
+    for (const [key, r] of Object.entries(opsVentas.registros)) {
+      const pais = getPais(key) || 'Sin pais';
+      if (!paisData[pais]) paisData[pais] = {compraUsd:0,compraEur:0,venta:0,utilidad:0,provs:0,clis:0};
+      paisData[pais].venta += r.ingreso_usd || 0;
+      paisData[pais].utilidad += r.utilidad_usd || 0;
+      paisData[pais].clis++;
+      if (!cliPorPais[pais]) cliPorPais[pais] = [];
+      cliPorPais[pais].push({nombre:r.nombre, ingreso:r.ingreso_usd||0, utilidad:r.utilidad_usd||0, emb:r.embarques});
+    }
+  }
+
+  const paises = Object.entries(paisData).sort((a,b) => (b[1].compraUsd + b[1].venta) - (a[1].compraUsd + a[1].venta));
+  const maxVol = Math.max(...paises.map(([,d]) => d.compraUsd + d.venta)) || 1;
+
+  // Panel 1: Resumen
+  let html = `<table><thead><tr><th>Pais</th><th class="num">Proveedores</th><th class="num">Compra USD</th><th class="num">Compra EUR</th><th class="num">Clientes</th><th class="num">Venta USD</th><th class="num">Utilidad</th><th class="num">Balance USD</th><th>Volumen</th></tr></thead><tbody>`;
+  for (const [pais, d] of paises) {
+    const balance = d.venta - d.compraUsd;
+    const balClass = balance >= 0 ? 'pais-positive' : 'pais-negative';
+    const pct = ((d.compraUsd + d.venta) / maxVol * 100).toFixed(0);
+    html += `<tr>
+      <td><b>${pais}</b></td>
+      <td class="num">${d.provs||''}</td>
+      <td class="num">${d.compraUsd ? fmt(d.compraUsd).replace('$','$') : ''}</td>
+      <td class="num">${d.compraEur ? '€'+d.compraEur.toLocaleString('es-MX',{maximumFractionDigits:0}) : ''}</td>
+      <td class="num">${d.clis||''}</td>
+      <td class="num">${d.venta ? fmt(d.venta) : ''}</td>
+      <td class="num">${d.utilidad ? fmt(d.utilidad) : ''}</td>
+      <td class="num ${balClass}">${fmt(balance)}</td>
+      <td><div class="country-bar"><div class="country-bar-fill" style="width:${pct}%;background:${balance>=0?'#059669':'#dc2626'}"></div></div></td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('mercadosResumenWrap').innerHTML = html;
+
+  // Panel 2: Chart balance
+  const paisesChart = paises.filter(([p]) => p !== 'Sin pais').slice(0, 20);
+  const labels = paisesChart.map(([p]) => p);
+  const balances = paisesChart.map(([,d]) => d.venta - d.compraUsd);
+  const colors = balances.map(v => v >= 0 ? '#059669' : '#dc2626');
+  if (chartBalance) chartBalance.destroy();
+  const ctx = document.getElementById('chartBalance');
+  if (ctx) {
+    chartBalance = new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets: [{ label: 'Balance USD (Venta - Compra)', data: balances, backgroundColor: colors, borderRadius: 4 }] },
+      options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } },
+        scales: { x: { ticks: { callback: v => fmt(v) } } } }
+    });
+  }
+
+  // Panel 3: Proveedores por mercado
+  let htmlP = '';
+  for (const [pais, agents] of Object.entries(provPorPais).sort((a,b) => b[1].reduce((s,x)=>s+x.usd,0) - a[1].reduce((s,x)=>s+x.usd,0))) {
+    agents.sort((a,b) => (b.usd+b.eur) - (a.usd+a.eur));
+    htmlP += `<details><summary><b>${pais}</b> (${agents.length} proveedores)</summary><table><thead><tr><th>Proveedor</th><th class="num">USD</th><th class="num">EUR</th><th class="num">Emb</th></tr></thead><tbody>`;
+    for (const a of agents) {
+      htmlP += `<tr><td>${a.nombre}</td><td class="num">${a.usd?fmt(a.usd):''}</td><td class="num">${a.eur?'€'+a.eur.toLocaleString('es-MX',{maximumFractionDigits:0}):''}</td><td class="num">${a.emb}</td></tr>`;
+    }
+    htmlP += '</tbody></table></details>';
+  }
+  document.getElementById('mercadosProvWrap').innerHTML = htmlP || '<div class="empty">Sin datos</div>';
+
+  // Panel 4: Clientes por mercado
+  let htmlC = '';
+  for (const [pais, agents] of Object.entries(cliPorPais).sort((a,b) => b[1].reduce((s,x)=>s+x.ingreso,0) - a[1].reduce((s,x)=>s+x.ingreso,0))) {
+    agents.sort((a,b) => b.ingreso - a.ingreso);
+    htmlC += `<details><summary><b>${pais}</b> (${agents.length} clientes)</summary><table><thead><tr><th>Cliente</th><th class="num">Venta</th><th class="num">Utilidad</th><th class="num">Emb</th></tr></thead><tbody>`;
+    for (const a of agents) {
+      htmlC += `<tr><td>${a.nombre}</td><td class="num">${fmt(a.ingreso)}</td><td class="num">${fmt(a.utilidad)}</td><td class="num">${a.emb}</td></tr>`;
+    }
+    htmlC += '</tbody></table></details>';
+  }
+  document.getElementById('mercadosCliWrap').innerHTML = htmlC || '<div class="empty">Sin datos</div>';
+}
+
 document.getElementById('exportBtn').addEventListener('click', () => {
   if (!combinado.length) return alert('No hay datos');
   const rows = combinado.map(r => {
