@@ -446,6 +446,7 @@ function procesarVentas(matriz) {
         ingreso_usd: 0,
         utilidad_usd: 0,
         embarques: 0,
+        _embSet: new Set(),
         porCategoria: {},
         porSubcategoria: {}
       });
@@ -453,19 +454,20 @@ function procesarVentas(matriz) {
     const e = porCliente.get(key);
     e.ingreso_usd += ingreso;
     e.utilidad_usd += neto;
-    e.embarques += 1;
+    const embId = String(row[cEmbarque]||'').trim();
+    if (!e._embSet.has(embId)) { e._embSet.add(embId); e.embarques += 1; }
 
     const catKey = embarque.cat;
-    if (!e.porCategoria[catKey]) e.porCategoria[catKey] = {ingreso:0, utilidad:0, count:0};
+    if (!e.porCategoria[catKey]) e.porCategoria[catKey] = {ingreso:0, utilidad:0, count:0, _embSet: new Set()};
     e.porCategoria[catKey].ingreso += ingreso;
     e.porCategoria[catKey].utilidad += neto;
-    e.porCategoria[catKey].count += 1;
+    if (!e.porCategoria[catKey]._embSet.has(embId)) { e.porCategoria[catKey]._embSet.add(embId); e.porCategoria[catKey].count += 1; }
 
     const subKey = embarque.prefijo;
-    if (!e.porSubcategoria[subKey]) e.porSubcategoria[subKey] = {ingreso:0, utilidad:0, count:0, sub:embarque.sub, cat:embarque.cat};
+    if (!e.porSubcategoria[subKey]) e.porSubcategoria[subKey] = {ingreso:0, utilidad:0, count:0, sub:embarque.sub, cat:embarque.cat, _embSet: new Set()};
     e.porSubcategoria[subKey].ingreso += ingreso;
     e.porSubcategoria[subKey].utilidad += neto;
-    e.porSubcategoria[subKey].count += 1;
+    if (!e.porSubcategoria[subKey]._embSet.has(embId)) { e.porSubcategoria[subKey]._embSet.add(embId); e.porSubcategoria[subKey].count += 1; }
 
     procesadas++;
   }
@@ -535,23 +537,25 @@ function procesarCompras(matriz) {
         nombre: nombreCatalogo,
         compras: {},     // por moneda
         embarques: 0,
-        porCategoria: {}, 
+        _embSet: new Set(),
+        porCategoria: {},
         porSubcategoria: {}
       });
     }
     const e = porProveedor.get(key);
     e.compras[moneda] = (e.compras[moneda]||0) + total;
-    e.embarques += 1;
+    const embId = String(row[cEmbarque]||'').trim();
+    if (!e._embSet.has(embId)) { e._embSet.add(embId); e.embarques += 1; }
 
     const catKey = embarque.cat;
-    if (!e.porCategoria[catKey]) e.porCategoria[catKey] = {montos:{}, count:0};
+    if (!e.porCategoria[catKey]) e.porCategoria[catKey] = {montos:{}, count:0, _embSet: new Set()};
     e.porCategoria[catKey].montos[moneda] = (e.porCategoria[catKey].montos[moneda]||0) + total;
-    e.porCategoria[catKey].count += 1;
+    if (!e.porCategoria[catKey]._embSet.has(embId)) { e.porCategoria[catKey]._embSet.add(embId); e.porCategoria[catKey].count += 1; }
 
     const subKey = embarque.prefijo;
-    if (!e.porSubcategoria[subKey]) e.porSubcategoria[subKey] = {montos:{}, count:0, sub:embarque.sub, cat:embarque.cat};
+    if (!e.porSubcategoria[subKey]) e.porSubcategoria[subKey] = {montos:{}, count:0, sub:embarque.sub, cat:embarque.cat, _embSet: new Set()};
     e.porSubcategoria[subKey].montos[moneda] = (e.porSubcategoria[subKey].montos[moneda]||0) + total;
-    e.porSubcategoria[subKey].count += 1;
+    if (!e.porSubcategoria[subKey]._embSet.has(embId)) { e.porSubcategoria[subKey]._embSet.add(embId); e.porSubcategoria[subKey].count += 1; }
 
     procesadas++;
   }
